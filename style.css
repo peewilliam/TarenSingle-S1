@@ -1,0 +1,12 @@
+/* Add to existing style.css */
+canvas {
+  display: block;
+  outline: none;
+  cursor: default;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  user-select: none;
+}

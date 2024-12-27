@@ -1,24 +1,16 @@
-import './style.css'
-import javascriptLogo from './javascript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.js'
+import './style.css';
+import { GameEngine } from './game/core/GameEngine.js';
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
+// Initialize game
+const game = new GameEngine();
 
-setupCounter(document.querySelector('#counter'))
+// Start the game loop
+game.start();
+
+// Add initial instructions to chat
+game.uiManager.addChatMessage('System', 'Welcome to the game!', 'system');
+game.uiManager.addChatMessage('System', 'Controls:', 'system');
+game.uiManager.addChatMessage('System', '- QWER: Use skills', 'system');
+game.uiManager.addChatMessage('System', '- Right click: Move', 'system');
+game.uiManager.addChatMessage('System', '- Left click: Select target', 'system');
+game.uiManager.addChatMessage('System', '- Enter: Open chat', 'system');
