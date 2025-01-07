@@ -70,44 +70,65 @@ body::after,
 
 /* Logo Container */
 .logo-container {
-    margin-bottom: 30px;
-    perspective: 1000px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
 }
 
 .logo {
     position: relative;
     display: inline-block;
-    transform-style: preserve-3d;
+    padding: 20px;
 }
 
 .logo img {
-    max-width: 360px;
-    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.2));
+    max-width: 460px;
+    filter: drop-shadow(0 0 15px rgba(139, 0, 0, 0.3));
     transition: all 0.3s ease;
 }
 
-.logo-glow {
+.logo::after {
+    content: '';
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 120%;
     height: 120%;
-    background: radial-gradient(circle, rgba(255, 215, 0, 0.15) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(139, 0, 0, 0.15) 0%, transparent 70%);
     pointer-events: none;
+    z-index: -1;
+}
+
+/* Ajuste para telas menores */
+@media (max-width: 480px) {
+    .logo img {
+        max-width: 340px;
+    }
+    
+    .login-container {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 360px) {
+    .logo img {
+        max-width: 300px;
+    }
+    
+    .login-container {
+        padding: 10px;
+    }
 }
 
 /* Form Container */
 .login-form {
-    background: rgba(20, 20, 28, 0.95);
-    padding: 35px;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5),
-                0 0 60px rgba(255, 215, 0, 0.1);
-    backdrop-filter: blur(10px);
-    transform-style: preserve-3d;
-    animation: slideUp 0.5s ease-out;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Ajuste dos campos de input */
@@ -169,17 +190,38 @@ input[type="password"]:focus {
     font-size: 18px;
     font-weight: bold;
     cursor: pointer;
-    transition: transform 0.2s ease, background-color 0.2s ease;
     text-transform: uppercase;
     letter-spacing: 3px;
     margin: 30px 0;
     position: relative;
     overflow: hidden;
     transform-style: preserve-3d;
+    transition: transform 0.2s ease, background 0.3s ease;
+}
+
+.login-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    transition: 0.5s;
 }
 
 .login-button:hover {
     transform: translateY(-2px);
+    background: linear-gradient(135deg, #8b0000 0%, var(--secondary-color) 100%);
+}
+
+.login-button:hover::before {
+    left: 100%;
 }
 
 .login-button:active {
@@ -256,15 +298,11 @@ input[type="password"]:focus {
         max-width: 95%;
         padding: 10px;
     }
-
-    .logo img {
-        max-width: 260px;
-    }
-
+    
     .login-form {
-        padding: 25px;
+        padding: 20px;
     }
-
+    
     .social-icon {
         font-size: 20px;
         padding: 8px;
@@ -272,14 +310,10 @@ input[type="password"]:focus {
 }
 
 @media (max-width: 360px) {
-    .logo img {
-        max-width: 220px;
-    }
-
     .login-form {
-        padding: 20px;
+        padding: 15px;
     }
-
+    
     .social-icon {
         font-size: 18px;
         padding: 6px;
