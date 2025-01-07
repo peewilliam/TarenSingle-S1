@@ -13,6 +13,7 @@
     --text-secondary: #a8a8a8;
     --border-color: rgba(255, 215, 0, 0.1);
     --error-color: #dc3545;
+    --primary-color-hover: #ff9900;
 }
 
 body {
@@ -134,52 +135,117 @@ body::after,
 /* Ajuste dos campos de input */
 .form-group {
     position: relative;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     transform-style: preserve-3d;
     transition: transform 0.2s ease;
 }
 
-.form-group.focused {
-    transform: translateY(-2px);
-}
-
-.input-icon {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-secondary);
-    transition: all 0.3s ease;
-    font-size: 18px;
-}
-
-.form-group.focused .input-icon {
-    color: var(--primary-color);
-    transform: translateY(-50%) scale(1.1);
-}
-
-input[type="text"],
-input[type="password"] {
+.form-group input {
     width: 100%;
-    padding: 15px 15px 15px 45px;
+    padding: 12px 40px;
     background: rgba(0, 0, 0, 0.3);
     border: 1px solid var(--border-color);
-    border-radius: 6px;
-    color: var(--text-color);
+    border-radius: 4px;
+    color: white;
     font-size: 16px;
     transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 10px rgba(139, 0, 0, 0.3);
+}
+
+.form-group .input-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--secondary-color);
+    opacity: 0.8;
+}
+
+.form-group input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    font-size: 14px;
     letter-spacing: 1px;
 }
 
-input[type="text"]:focus,
-input[type="password"]:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
-    outline: none;
-    transform: translateZ(10px);
+/* Estilo específico para o formulário de criar conta e reset de senha */
+#createAccountForm .form-group,
+#resetForm .form-group {
+    margin-bottom: 20px;
 }
 
-/* Botão de Login */
+#createAccountForm .form-group input,
+#resetForm .form-group input {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    color: white;
+}
+
+#createAccountForm .form-group input:focus,
+#resetForm .form-group input:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 10px rgba(139, 0, 0, 0.3);
+}
+
+#createAccountForm .form-group .input-icon,
+#resetForm .form-group .input-icon {
+    color: var(--secondary-color);
+}
+
+#createAccountForm .login-button,
+#resetForm .login-button {
+    margin-top: 30px;
+}
+
+.back-to-login {
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease;
+    opacity: 0.8;
+    text-align: center;
+    display: block;
+    margin-top: 15px;
+}
+
+.back-to-login:hover {
+    color: #ff3333;
+    opacity: 1;
+}
+
+/* Links do footer */
+.footer-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.footer-links a {
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease;
+    opacity: 0.8;
+}
+
+.footer-links a:hover {
+    color: #ff3333;
+    opacity: 1;
+}
+
+.footer-links .separator {
+    color: var(--secondary-color);
+    opacity: 0.5;
+}
+
+/* Botões */
 .login-button {
     width: 100%;
     padding: 15px;
@@ -228,12 +294,12 @@ input[type="password"]:focus {
     transform: translateY(1px);
 }
 
-/* Links de rodapé */
-.footer-links {
-    margin-top: 25px;
-    color: var(--text-secondary);
+.login-button .button-text {
+    position: relative;
+    z-index: 1;
 }
 
+/* Links de rodapé */
 .footer-links a {
     color: var(--text-secondary);
     text-decoration: none;
@@ -280,6 +346,47 @@ input[type="password"]:focus {
     font-size: 12px;
     letter-spacing: 1px;
     opacity: 0.7;
+}
+
+/* Mensagens de erro e sucesso */
+.error-message,
+.success-message {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.error-message {
+    border-left: 4px solid #ff3333;
+}
+
+.success-message {
+    border-left: 4px solid #33ff33;
+}
+
+.error-message i,
+.success-message i {
+    font-size: 18px;
+}
+
+.error-message i {
+    color: #ff3333;
+}
+
+.success-message i {
+    color: #33ff33;
+}
+
+.error-message.fade-out,
+.success-message.fade-out {
+    opacity: 0;
 }
 
 @keyframes fadeIn {
@@ -350,4 +457,96 @@ input[type="password"]:focus {
     .version-info {
         display: none;
     }
+}
+
+/* Estilo do checkbox personalizado */
+.remember-me {
+    display: flex;
+    align-items: center;
+    margin: 15px 0;
+    cursor: pointer;
+    user-select: none;
+}
+
+.remember-me input[type="checkbox"] {
+    display: none;
+}
+
+.remember-me .checkbox-custom {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--secondary-color);
+    border-radius: 3px;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.remember-me input[type="checkbox"]:checked + .checkbox-custom {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.remember-me .checkbox-custom::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    opacity: 0;
+    background: #fff;
+    transition: all 0.2s ease;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.remember-me input[type="checkbox"]:checked + .checkbox-custom::after {
+    opacity: 1;
+}
+
+.remember-me span {
+    color: var(--text-color);
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+.remember-me:hover span {
+    color: var(--text-color);
+}
+
+.remember-me:hover .checkbox-custom {
+    box-shadow: 0 0 5px rgba(139, 0, 0, 0.3);
+}
+
+/* Botão de configurações */
+.settings-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--secondary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.settings-button i {
+    color: var(--secondary-color);
+    font-size: 20px;
+    transition: all 0.3s ease;
+}
+
+.settings-button:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 15px rgba(139, 0, 0, 0.3);
+    transform: rotate(90deg);
+}
+
+.settings-button:hover i {
+    color: var(--primary-color);
 }

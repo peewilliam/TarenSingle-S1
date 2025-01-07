@@ -3,8 +3,9 @@ export class LoginScene {
         this.canvas = null;
         this.ctx = null;
         this.particles = [];
-        this.touchStartX = 0;
-        this.touchStartY = 0;
+        this.touchStartX = null;
+        this.touchStartY = null;
+        this.originalLoginForm = null;
         this.init();
     }
 
@@ -80,15 +81,28 @@ export class LoginScene {
                     <img src="/assets/logo.svg" alt="TarenOnline Logo" aria-label="Logo TarenOnline">
                 </div>
             </div>
-            <form class="login-form" id="loginForm" autocomplete="off">
+            <form class="login-form" id="loginForm" autocomplete="off" spellcheck="false" data-lpignore="true">
+                <!-- Campo oculto para enganar o Chrome -->
+                <div style="display:none">
+                    <input type="text" name="hidden_username" />
+                    <input type="password" name="hidden_password" />
+                </div>
                 <div class="form-group">
                     <div class="input-icon" aria-hidden="true">
                         <i class="fas fa-user"></i>
                     </div>
                     <input type="text" 
                            id="username" 
+                           name="random_username_${Math.random()}"
                            placeholder="USUÁRIO"
-                           autocomplete="off"
+                           autocomplete="chrome-off"
+                           readonly
+                           onfocus="this.removeAttribute('readonly');"
+                           data-lpignore="true"
+                           data-form-type="other"
+                           autocapitalize="off"
+                           autocorrect="off"
+                           spellcheck="false"
                            aria-label="Nome de usuário"
                            required>
                 </div>
@@ -98,23 +112,25 @@ export class LoginScene {
                     </div>
                     <input type="password" 
                            id="password" 
+                           name="random_password_${Math.random()}"
                            placeholder="SENHA"
-                           autocomplete="off"
+                           autocomplete="chrome-off"
+                           readonly
+                           onfocus="this.removeAttribute('readonly');"
+                           data-lpignore="true"
+                           data-form-type="other"
+                           autocapitalize="off"
+                           autocorrect="off"
+                           spellcheck="false"
                            aria-label="Senha"
                            required>
                 </div>
-                <div class="remember-me">
-                    <label class="custom-checkbox">
-                        <input type="checkbox" 
-                               id="remember"
-                               aria-label="Lembrar informações da conta">
-                        <span class="checkmark" aria-hidden="true"></span>
-                        <span class="label-text">Lembrar informações da conta</span>
-                    </label>
-                </div>
-                <button id="loginBtn" 
-                        class="login-button"
-                        aria-label="Entrar no TarenOnline">
+                <label class="remember-me" for="rememberMe">
+                    <input type="checkbox" id="rememberMe">
+                    <div class="checkbox-custom"></div>
+                    <span>Lembrar informações</span>
+                </label>
+                <button type="submit" class="login-button">
                     <span class="button-text">ENTRAR</span>
                 </button>
                 <div class="footer-links">
@@ -139,7 +155,24 @@ export class LoginScene {
             </div>
         `;
         document.body.appendChild(loginContainer);
+        
+        // Salva uma cópia do formulário de login original
+        this.originalLoginForm = document.getElementById('loginForm').cloneNode(true);
+        
         this.setupLogoEffects();
+
+        // Botão de configurações
+        const settingsButton = document.createElement('button');
+        settingsButton.className = 'settings-button';
+        settingsButton.setAttribute('aria-label', 'Configurações');
+        settingsButton.innerHTML = '<i class="fas fa-cog"></i>';
+        document.body.appendChild(settingsButton);
+
+        // Adiciona evento de clique ao botão de configurações
+        settingsButton.addEventListener('click', () => {
+            // Aqui você pode adicionar a lógica para abrir as configurações
+            console.log('Abrir configurações');
+        });
     }
 
     setupLogoEffects() {
@@ -196,38 +229,57 @@ export class LoginScene {
         window.addEventListener('resize', () => this.resizeCanvas());
         this.resizeCanvas();
 
+        // Setup canvas touch events
+        this.setupCanvasEvents();
+        
+        // Setup login form events
+        this.setupLoginFormEvents();
+    }
+
+    setupLoginFormEvents() {
         const loginBtn = document.getElementById('loginBtn');
         const inputs = document.querySelectorAll('input[type="text"], input[type="password"]');
+        const createAccountLink = document.querySelector('.create-account');
+        const forgotPasswordLink = document.querySelector('.forgot-password');
         
-        loginBtn.addEventListener('click', this.handleLogin.bind(this));
+        if (loginBtn) {
+            loginBtn.addEventListener('click', this.handleLogin.bind(this));
+        }
         
-        // Enhanced input handling
+        if (createAccountLink) {
+            createAccountLink.addEventListener('click', this.handleCreateAccount.bind(this));
+        }
+        
+        if (forgotPasswordLink) {
+            forgotPasswordLink.addEventListener('click', this.handleForgotPassword.bind(this));
+        }
+        
         inputs.forEach(input => {
-            // Focus and blur effects
-            input.addEventListener('focus', () => {
-                input.parentElement.classList.add('focused');
-                this.handleInputFocus(input);
-            });
-            
-            input.addEventListener('blur', () => {
-                if (!input.value) {
-                    input.parentElement.classList.remove('focused');
-                }
-                this.handleInputBlur(input);
-            });
+            if (input) {
+                input.addEventListener('focus', () => {
+                    input.parentElement.classList.add('focused');
+                    this.handleInputFocus(input);
+                });
+                
+                input.addEventListener('blur', () => {
+                    if (!input.value) {
+                        input.parentElement.classList.remove('focused');
+                    }
+                    this.handleInputBlur(input);
+                });
 
-            // Validation
-            input.addEventListener('input', () => this.validateInput(input));
+                input.addEventListener('input', () => this.validateInput(input));
 
-            // Enter key handling
-            input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.handleLogin(e);
-                }
-            });
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.handleLogin(e);
+                    }
+                });
+            }
         });
+    }
 
-        // Touch events for mobile
+    setupCanvasEvents() {
         this.canvas.addEventListener('touchstart', (e) => {
             this.touchStartX = e.touches[0].clientX;
             this.touchStartY = e.touches[0].clientY;
@@ -403,6 +455,262 @@ export class LoginScene {
         }, 1500);
     }
 
+    backToLogin() {
+        const currentForm = document.querySelector('.login-form');
+        if (currentForm && this.originalLoginForm) {
+            // Cria uma nova cópia do formulário original
+            const newLoginForm = this.originalLoginForm.cloneNode(true);
+            currentForm.parentNode.replaceChild(newLoginForm, currentForm);
+            this.setupLoginFormEvents();
+        }
+    }
+
+    handleCreateAccount(e) {
+        e.preventDefault();
+        const loginForm = document.querySelector('.login-form');
+        const createAccountForm = document.createElement('form');
+        createAccountForm.className = 'login-form';
+        createAccountForm.id = 'createAccountForm';
+        createAccountForm.autocomplete = 'off';
+        createAccountForm.spellcheck = 'false';
+        createAccountForm.dataLpignore = 'true';
+        
+        createAccountForm.innerHTML = `
+            <form autocomplete="off" spellcheck="false" data-lpignore="true">
+                <!-- Campo oculto para enganar o Chrome -->
+                <div style="display:none">
+                    <input type="text" name="hidden_username" />
+                    <input type="password" name="hidden_password" />
+                </div>
+                <div class="form-group">
+                    <div class="input-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <input type="text" 
+                           id="newUsername" 
+                           name="random_newuser_${Math.random()}"
+                           placeholder="NOVO USUÁRIO"
+                           autocomplete="chrome-off"
+                           readonly
+                           onfocus="this.removeAttribute('readonly');"
+                           data-lpignore="true"
+                           data-form-type="other"
+                           autocapitalize="off"
+                           autocorrect="off"
+                           spellcheck="false"
+                           required>
+                </div>
+                <div class="form-group">
+                    <div class="input-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <input type="text" 
+                           id="email" 
+                           name="random_email_${Math.random()}"
+                           placeholder="E-MAIL"
+                           autocomplete="chrome-off"
+                           readonly
+                           onfocus="this.removeAttribute('readonly');"
+                           data-lpignore="true"
+                           data-form-type="other"
+                           autocapitalize="off"
+                           autocorrect="off"
+                           spellcheck="false"
+                           required
+                           pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
+                </div>
+                <div class="form-group">
+                    <div class="input-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <input type="password" 
+                           id="newPassword" 
+                           name="random_newpass_${Math.random()}"
+                           placeholder="NOVA SENHA"
+                           autocomplete="chrome-off"
+                           readonly
+                           onfocus="this.removeAttribute('readonly');"
+                           data-lpignore="true"
+                           data-form-type="other"
+                           autocapitalize="off"
+                           autocorrect="off"
+                           spellcheck="false"
+                           required>
+                </div>
+                <div class="form-group">
+                    <div class="input-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <input type="password" 
+                           id="confirmPassword" 
+                           name="random_confpass_${Math.random()}"
+                           placeholder="CONFIRMAR SENHA"
+                           autocomplete="chrome-off"
+                           readonly
+                           onfocus="this.removeAttribute('readonly');"
+                           data-lpignore="true"
+                           data-form-type="other"
+                           autocapitalize="off"
+                           autocorrect="off"
+                           spellcheck="false"
+                           required>
+                </div>
+                <button type="submit" class="login-button">
+                    <span class="button-text">CRIAR CONTA</span>
+                </button>
+                <div class="footer-links">
+                    <a href="#" class="back-to-login">Voltar para o Login</a>
+                </div>
+            `;
+
+        if (loginForm) {
+            loginForm.parentNode.replaceChild(createAccountForm, loginForm);
+
+            // Adiciona evento de voltar para login
+            const backToLoginLink = document.querySelector('.back-to-login');
+            if (backToLoginLink) {
+                backToLoginLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.backToLogin();
+                });
+            }
+
+            // Adiciona evento de submit do formulário de criação
+            createAccountForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = document.getElementById('newUsername').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                if (password !== confirmPassword) {
+                    this.showError('As senhas não coincidem');
+                    return;
+                }
+
+                console.log('Criando conta:', { username, email });
+                
+                setTimeout(() => {
+                    this.showSuccess('Conta criada com sucesso!');
+                    setTimeout(() => {
+                        this.backToLogin();
+                    }, 1500);
+                }, 1000);
+            });
+
+            // Setup events for the new form
+            const newInputs = createAccountForm.querySelectorAll('input');
+            newInputs.forEach(input => {
+                if (input) {
+                    input.addEventListener('focus', () => {
+                        input.parentElement.classList.add('focused');
+                        this.handleInputFocus(input);
+                    });
+                    
+                    input.addEventListener('blur', () => {
+                        if (!input.value) {
+                            input.parentElement.classList.remove('focused');
+                        }
+                        this.handleInputBlur(input);
+                    });
+
+                    input.addEventListener('input', () => this.validateInput(input));
+                }
+            });
+        }
+    }
+
+    handleForgotPassword(e) {
+        e.preventDefault();
+        const loginForm = document.querySelector('.login-form');
+        const resetForm = document.createElement('form');
+        resetForm.className = 'login-form';
+        resetForm.id = 'resetForm';
+        resetForm.autocomplete = 'off';
+        resetForm.spellcheck = 'false';
+        resetForm.dataLpignore = 'true';
+        
+        resetForm.innerHTML = `
+            <form autocomplete="off" spellcheck="false" data-lpignore="true">
+                <!-- Campo oculto para enganar o Chrome -->
+                <div style="display:none">
+                    <input type="text" name="hidden_username" />
+                    <input type="password" name="hidden_password" />
+                </div>
+                <div class="form-group">
+                    <div class="input-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <input type="text" 
+                           id="resetEmail" 
+                           name="random_resetemail_${Math.random()}"
+                           placeholder="SEU E-MAIL"
+                           autocomplete="chrome-off"
+                           readonly
+                           onfocus="this.removeAttribute('readonly');"
+                           data-lpignore="true"
+                           data-form-type="other"
+                           autocapitalize="off"
+                           autocorrect="off"
+                           spellcheck="false"
+                           required
+                           pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
+                </div>
+                <button type="submit" class="login-button">
+                    <span class="button-text">RECUPERAR SENHA</span>
+                </button>
+                <div class="footer-links">
+                    <a href="#" class="back-to-login">Voltar para o Login</a>
+                </div>
+            `;
+
+        if (loginForm) {
+            loginForm.parentNode.replaceChild(resetForm, loginForm);
+
+            // Adiciona evento de voltar para login
+            const backToLoginLink = document.querySelector('.back-to-login');
+            if (backToLoginLink) {
+                backToLoginLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.backToLogin();
+                });
+            }
+
+            // Adiciona evento de submit do formulário de reset
+            resetForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('resetEmail').value;
+
+                console.log('Solicitando reset de senha para:', email);
+                
+                setTimeout(() => {
+                    this.showSuccess('E-mail de recuperação enviado!');
+                    setTimeout(() => {
+                        this.backToLogin();
+                    }, 1500);
+                }, 1000);
+            });
+
+            // Setup events for the reset form
+            const resetEmail = document.getElementById('resetEmail');
+            if (resetEmail) {
+                resetEmail.addEventListener('focus', () => {
+                    resetEmail.parentElement.classList.add('focused');
+                    this.handleInputFocus(resetEmail);
+                });
+                
+                resetEmail.addEventListener('blur', () => {
+                    if (!resetEmail.value) {
+                        resetEmail.parentElement.classList.remove('focused');
+                    }
+                    this.handleInputBlur(resetEmail);
+                });
+
+                resetEmail.addEventListener('input', () => this.validateInput(resetEmail));
+            }
+        }
+    }
+
     showError(message) {
         const existingError = document.querySelector('.error-message');
         if (existingError) {
@@ -423,6 +731,29 @@ export class LoginScene {
         setTimeout(() => {
             errorDiv.classList.add('fade-out');
             setTimeout(() => errorDiv.remove(), 300);
+        }, 3000);
+    }
+
+    showSuccess(message) {
+        const existingSuccess = document.querySelector('.success-message');
+        if (existingSuccess) {
+            existingSuccess.remove();
+        }
+
+        const successDiv = document.createElement('div');
+        successDiv.className = 'success-message';
+        successDiv.setAttribute('role', 'alert');
+        successDiv.innerHTML = `
+            <i class="fas fa-check-circle" aria-hidden="true"></i>
+            <span>${message}</span>
+        `;
+        
+        const form = document.querySelector('form');
+        form.insertBefore(successDiv, form.firstChild);
+        
+        setTimeout(() => {
+            successDiv.classList.add('fade-out');
+            setTimeout(() => successDiv.remove(), 300);
         }, 3000);
     }
 
