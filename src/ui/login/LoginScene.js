@@ -326,6 +326,8 @@ export class LoginScene {
     }
 
     animate() {
+        if (!this.ctx || !this.canvas) return;
+        
         // Limpa o canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
@@ -573,22 +575,33 @@ export class LoginScene {
     }
 
     cleanup() {
-        // Remove os event listeners
-        if (this.canvas) {
-            this.canvas.removeEventListener('touchstart', this.handleTouchStart);
-            this.canvas.removeEventListener('touchmove', this.handleTouchMove);
-            this.canvas.removeEventListener('touchend', this.handleTouchEnd);
-            window.removeEventListener('resize', this.handleResize);
-        }
-        
-        // Para a animação
+        // Cancela a animação
         if (this.animationFrameId) {
             cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
         }
+
+        // Remove event listeners
+        window.removeEventListener('resize', this.resizeCanvas);
         
-        // Remove referências
-        this.canvas = null;
-        this.ctx = null;
+        // Limpa o canvas
+        if (this.canvas && this.ctx) {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+
+        // Remove elementos do DOM
+        if (this.canvas) {
+            this.canvas.remove();
+            this.canvas = null;
+            this.ctx = null;
+        }
+
+        if (this.container) {
+            this.container.remove();
+            this.container = null;
+        }
+
+        // Limpa as partículas
         this.particles = [];
     }
 }

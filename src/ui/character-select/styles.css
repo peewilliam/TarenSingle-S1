@@ -291,6 +291,251 @@ body {
     background: var(--primary-color-hover);
 }
 
+/* Modal de criação de personagem */
+.create-character-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.character-creation {
+    background: linear-gradient(to bottom, rgba(30, 20, 20, 0.95), rgba(20, 10, 10, 0.95));
+    border: 2px solid #4a2828;
+    border-radius: 12px;
+    width: 95%;
+    max-width: 1200px;
+    height: 85vh;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    color: #e0d0d0;
+}
+
+.creation-container {
+    display: flex;
+    flex: 1;
+    gap: 30px;
+}
+
+.left-panel {
+    width: 300px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    border: 1px solid #4a2828;
+}
+
+.section {
+    margin-bottom: 30px;
+}
+
+.section h3 {
+    font-family: 'Cinzel', serif;
+    color: #c0a080;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 1.2em;
+    position: relative;
+}
+
+.section h3::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 2px;
+    background: linear-gradient(to right, transparent, #4a2828, transparent);
+}
+
+/* Opções de Gênero */
+.gender-options {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+.gender-option {
+    cursor: pointer;
+}
+
+.gender-option input[type="radio"] {
+    display: none;
+}
+
+.gender-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border: 2px solid #4a2828;
+    border-radius: 50%;
+    font-size: 2em;
+    color: #c0a080;
+    transition: all 0.3s ease;
+}
+
+input[type="radio"]:checked + .gender-icon {
+    border-color: #c0a080;
+    background: rgba(192, 160, 128, 0.2);
+}
+
+/* Controles de Aparência */
+.appearance-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.slider-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.prev-btn,
+.next-btn {
+    background: transparent;
+    border: 1px solid #4a2828;
+    color: #c0a080;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.prev-btn:hover,
+.next-btn:hover {
+    border-color: #c0a080;
+    background: rgba(192, 160, 128, 0.1);
+}
+
+/* Tom de Pele */
+.skin-tones {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+    padding: 10px;
+}
+
+.skin-tone {
+    width: 30px;
+    height: 30px;
+    border: 2px solid #4a2828;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.skin-tone[data-tone="1"] { background: #ffe0d0; }
+.skin-tone[data-tone="2"] { background: #ffd0b0; }
+.skin-tone[data-tone="3"] { background: #e0b090; }
+.skin-tone[data-tone="4"] { background: #c09070; }
+.skin-tone[data-tone="5"] { background: #907050; }
+.skin-tone[data-tone="6"] { background: #604030; }
+
+.skin-tone.selected {
+    border-color: #c0a080;
+    transform: scale(1.1);
+}
+
+/* Centro - Preview do Personagem */
+.center-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.character-preview {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.character-silhouette {
+    width: 300px;
+    height: 500px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    position: relative;
+}
+
+.name-input {
+    width: 100%;
+    max-width: 400px;
+    margin-top: 20px;
+}
+
+.name-input input {
+    width: 100%;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #4a2828;
+    border-radius: 4px;
+    color: #e0d0d0;
+    font-family: 'Cinzel', serif;
+    text-align: center;
+    font-size: 1.1em;
+}
+
+.name-input input:focus {
+    border-color: #c0a080;
+    outline: none;
+}
+
+/* Botões de Ação */
+.footer-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.back-btn,
+.play-btn {
+    padding: 12px 40px;
+    font-family: 'Cinzel', serif;
+    font-size: 1.2em;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.back-btn {
+    background: transparent;
+    border: 1px solid #4a2828;
+    color: #c0a080;
+}
+
+.back-btn:hover {
+    border-color: #c0a080;
+    background: rgba(192, 160, 128, 0.1);
+}
+
+.play-btn {
+    background: linear-gradient(to bottom, #8b0000, #5c0000);
+    border: 1px solid #4a2828;
+    color: #e0d0d0;
+}
+
+.play-btn:hover {
+    background: linear-gradient(to bottom, #a00000, #6c0000);
+}
+
 /* Responsividade */
 @media (max-width: 1200px) {
     .main-content {
