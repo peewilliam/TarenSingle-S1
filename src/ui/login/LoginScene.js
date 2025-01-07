@@ -5,7 +5,6 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 import LoginForm from './components/LoginForm.js';
-import ServerList from './components/ServerList.js';
 import ChannelSelect from './components/ChannelSelect.js';
 import SystemInfo from './components/SystemInfo.js';
 import NewsPanel from './components/NewsPanel.js';
@@ -24,36 +23,47 @@ export class LoginScene {
         this.magicCircles = [];
         this.particles = null;
         this.skybox = null;
+
+        // Create main container
         this.mainContainer = document.createElement('div');
         this.mainContainer.className = 'main-container';
         document.body.appendChild(this.mainContainer);
+
+        // Create left panel
         this.leftPanel = document.createElement('div');
         this.leftPanel.className = 'left-panel';
         this.mainContainer.appendChild(this.leftPanel);
-        this.serverList = new ServerList(document.createElement('div'));
-        this.leftPanel.appendChild(this.serverList.container);
-        this.createTabs();
+
+        // Initialize panels
         this.newsPanel = new NewsPanel(document.createElement('div'));
         this.storePanel = new StorePanel(document.createElement('div'));
-        this.leftPanel.appendChild(this.newsPanel.container);
-        this.leftPanel.appendChild(this.storePanel.container);
+
+        // Create tabs and setup initial view
+        this.createTabs();
+        
+        // Initialize the rest of the scene
+        this.init();
+    }
+
+    init() {
         this.loginForm = new LoginForm(document.createElement('div'));
         this.mainContainer.appendChild(this.loginForm.container);
+        
         this.channelSelect = new ChannelSelect(document.createElement('div'));
         this.mainContainer.appendChild(this.channelSelect.container);
+        
         this.systemInfo = new SystemInfo(document.createElement('div'));
         this.mainContainer.appendChild(this.systemInfo.container);
+        
         this.createLogo();
         this.initializeEvents();
         this.setupScene();
         this.setupLights();
         this.setupControls();
         this.createEnvironment();
+        
         window.addEventListener('resize', () => this.onWindowResize());
-        this.init();
-    }
 
-    init() {
         // Configuração do renderer
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -66,7 +76,6 @@ export class LoginScene {
         this.camera.position.set(0, 3, 7);
         
         // Ambiente e efeitos
-        this.createEnvironment();
         this.createLighting();
         this.createAtmosphericEffects();
         this.createDynamicBackground();
@@ -338,18 +347,47 @@ export class LoginScene {
 
     createTabs() {
         const tabsContainer = document.createElement('div');
-        tabsContainer.className = 'left-panel-tabs';
-        tabsContainer.innerHTML = `
-            <button class="panel-tab active" data-tab="store">
-                <i class="fas fa-shopping-cart"></i>
-                Loja
-            </button>
-            <button class="panel-tab" data-tab="news">
-                <i class="fas fa-newspaper"></i>
-                Notícias
-            </button>
-        `;
+        tabsContainer.className = 'panel-tabs';
+        
+        const newsTab = document.createElement('div');
+        newsTab.className = 'panel-tab active';
+        newsTab.textContent = 'Notícias';
+        
+        const storeTab = document.createElement('div');
+        storeTab.className = 'panel-tab';
+        storeTab.textContent = 'Loja';
+        
+        tabsContainer.appendChild(newsTab);
+        tabsContainer.appendChild(storeTab);
         this.leftPanel.appendChild(tabsContainer);
+        
+        // Add panels to the left panel
+        const contentContainer = document.createElement('div');
+        contentContainer.className = 'panel-content-container';
+        this.leftPanel.appendChild(contentContainer);
+        
+        // Add panels to content container
+        contentContainer.appendChild(this.newsPanel.container);
+        contentContainer.appendChild(this.storePanel.container);
+        
+        // Set initial visibility
+        this.newsPanel.container.style.display = 'block';
+        this.storePanel.container.style.display = 'none';
+        
+        // Add click handlers
+        newsTab.addEventListener('click', () => {
+            newsTab.classList.add('active');
+            storeTab.classList.remove('active');
+            this.newsPanel.container.style.display = 'block';
+            this.storePanel.container.style.display = 'none';
+        });
+        
+        storeTab.addEventListener('click', () => {
+            storeTab.classList.add('active');
+            newsTab.classList.remove('active');
+            this.storePanel.container.style.display = 'block';
+            this.newsPanel.container.style.display = 'none';
+        });
     }
 
     initializeEvents() {
@@ -361,9 +399,9 @@ export class LoginScene {
                 tab.classList.add('active');
                 this.playButtonSound();
 
-                const tabName = tab.dataset.tab;
-                this.newsPanel.container.classList.toggle('active', tabName === 'news');
-                this.storePanel.container.classList.toggle('active', tabName === 'store');
+                const tabName = tab.textContent;
+                this.newsPanel.container.classList.toggle('active', tabName === 'Notícias');
+                this.storePanel.container.classList.toggle('active', tabName === 'Loja');
             });
         });
     }
