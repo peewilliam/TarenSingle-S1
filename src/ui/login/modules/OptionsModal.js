@@ -1,7 +1,17 @@
+import { GeneralTab } from './tabs/GeneralTab.js';
+import { GraphicsTab } from './tabs/GraphicsTab.js';
+import { AudioTab } from './tabs/AudioTab.js';
+
 export class OptionsModal {
     constructor() {
         this.overlay = null;
         this.modal = null;
+        this.currentTab = 'general';
+        this.tabs = {
+            general: new GeneralTab(this),
+            graphics: new GraphicsTab(this),
+            audio: new AudioTab(this)
+        };
     }
 
     create() {
@@ -18,69 +28,17 @@ export class OptionsModal {
                 <button class="options-close" aria-label="Fechar configurações">&times;</button>
             </div>
             <div class="options-tabs">
-                <button class="tab-button active">GERAL</button>
-                <button class="tab-button">GRÁFICOS</button>
-                <button class="tab-button">ÁUDIO</button>
+                <button class="tab-button active" data-tab="general">GERAL</button>
+                <button class="tab-button" data-tab="graphics">GRÁFICOS</button>
+                <button class="tab-button" data-tab="audio">ÁUDIO</button>
             </div>
             <div class="options-content">
-                <div class="left-column">
-                    <div class="options-section">
-                        <h3>RESOLUÇÃO</h3>
-                        <select class="custom-select">
-                            <option>Selecione a resolução</option>
-                            <option>1920x1080 (Recomendado)</option>
-                            <option>1600x900</option>
-                            <option>1366x768</option>
-                        </select>
-                    </div>
-                    <div class="options-section">
-                        <h3>BRILHO</h3>
-                        <div class="custom-slider">
-                            <div class="slider-handle" style="left: 40%"></div>
-                        </div>
-                        <div style="text-align: right; color: #666;">40%</div>
-                    </div>
-                    <div class="options-section">
-                        <h3>QUALIDADE GERAL</h3>
-                        <div class="custom-slider">
-                            <div class="slider-handle" style="left: 60%"></div>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; color: #666;">
-                            <span>Baixa</span>
-                            <span>Média</span>
-                            <span>Alta</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="right-column">
-                    <div class="options-section">
-                        <h3>CONFIGURAÇÕES DE VÍDEO</h3>
-                        <label class="custom-checkbox">
-                            <input type="checkbox">
-                            <span>Tela Cheia</span>
-                        </label>
-                    </div>
-                    <div class="options-section">
-                        <h3>CONFIGURAÇÕES DE ÁUDIO</h3>
-                        <label class="custom-checkbox">
-                            <input type="checkbox" checked>
-                            <span>Som Ambiente</span>
-                        </label>
-                    </div>
-                    <div class="options-section">
-                        <h3>QUALIDADE DAS TEXTURAS</h3>
-                        <div class="custom-radio">
-                            <input type="radio" name="textures" id="radio1">
-                            <label for="radio1">Normal</label>
-                        </div>
-                        <div class="custom-radio">
-                            <input type="radio" name="textures" id="radio2">
-                            <label for="radio2">Alta Qualidade</label>
-                        </div>
-                    </div>
-                </div>
+                <div id="general-tab" class="tab-content active"></div>
+                <div id="graphics-tab" class="tab-content"></div>
+                <div id="audio-tab" class="tab-content"></div>
             </div>
             <div class="options-footer">
+                <button class="reset-button">REDEFINIR</button>
                 <button class="apply-button">APLICAR</button>
             </div>
         `;
@@ -88,17 +46,27 @@ export class OptionsModal {
         document.body.appendChild(this.overlay);
         document.body.appendChild(this.modal);
 
+        // Inicializa as tabs
+        this.initializeTabs();
         this.setupEvents();
+    }
+
+    initializeTabs() {
+        // Monta o conteúdo de cada tab
+        const generalTab = this.modal.querySelector('#general-tab');
+        const graphicsTab = this.modal.querySelector('#graphics-tab');
+        const audioTab = this.modal.querySelector('#audio-tab');
+
+        generalTab.appendChild(this.tabs.general.create());
+        graphicsTab.appendChild(this.tabs.graphics.create());
+        audioTab.appendChild(this.tabs.audio.create());
     }
 
     saveSettings() {
         const settings = {
-            resolution: this.modal.querySelector('.custom-select').value,
-            brightness: parseInt(this.modal.querySelector('.slider-handle').style.left),
-            quality: parseInt(this.modal.querySelectorAll('.slider-handle')[1].style.left),
-            fullscreen: this.modal.querySelector('input[type="checkbox"]').checked,
-            ambientSound: this.modal.querySelectorAll('input[type="checkbox"]')[1].checked,
-            textureQuality: this.modal.querySelector('input[name="textures"]:checked')?.id || 'radio1'
+            ...this.tabs.general.getSettings(),
+            ...this.tabs.graphics.getSettings(),
+            ...this.tabs.audio.getSettings()
         };
 
         localStorage.setItem('gameSettings', JSON.stringify(settings));
@@ -107,21 +75,12 @@ export class OptionsModal {
 
     loadSettings() {
         const savedSettings = localStorage.getItem('gameSettings');
-        if (savedSettings) {
-            const settings = JSON.parse(savedSettings);
-            
-            // Aplica as configurações salvas
-            this.modal.querySelector('.custom-select').value = settings.resolution;
-            this.modal.querySelector('.slider-handle').style.left = `${settings.brightness}%`;
-            this.modal.querySelectorAll('.slider-handle')[1].style.left = `${settings.quality}%`;
-            this.modal.querySelector('input[type="checkbox"]').checked = settings.fullscreen;
-            this.modal.querySelectorAll('input[type="checkbox"]')[1].checked = settings.ambientSound;
-            
-            if (settings.textureQuality) {
-                const radioButton = this.modal.querySelector(`#${settings.textureQuality}`);
-                if (radioButton) radioButton.checked = true;
-            }
-        }
+        const settings = savedSettings ? JSON.parse(savedSettings) : {};
+
+        // Carrega as configurações em cada tab
+        this.tabs.general.loadSettings(settings);
+        this.tabs.graphics.loadSettings(settings);
+        this.tabs.audio.loadSettings(settings);
     }
 
     setupEvents() {
@@ -136,7 +95,10 @@ export class OptionsModal {
         settingsButton.addEventListener('click', () => {
             this.overlay.classList.add('active');
             this.modal.classList.add('active');
-            this.loadSettings(); // Carrega as configurações salvas
+            this.loadSettings();
+            
+            // Ativa a primeira tab por padrão
+            this.switchTab('general');
         });
 
         // Botão de fechar
@@ -152,7 +114,6 @@ export class OptionsModal {
             const settings = this.saveSettings();
             console.log('Configurações salvas:', settings);
             
-            // Feedback visual
             applyButton.textContent = 'APLICADO!';
             setTimeout(() => {
                 applyButton.textContent = 'APLICAR';
@@ -161,43 +122,50 @@ export class OptionsModal {
             }, 1000);
         });
 
-        // Eventos dos sliders
-        const sliderHandles = this.modal.querySelectorAll('.slider-handle');
-        sliderHandles.forEach(handle => {
-            let isDragging = false;
-            let startX, startLeft;
-
-            handle.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                startX = e.clientX;
-                startLeft = parseInt(handle.style.left) || 0;
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', onMouseUp);
-            });
-
-            const onMouseMove = (e) => {
-                if (!isDragging) return;
-                
-                const dx = e.clientX - startX;
-                let newLeft = startLeft + (dx / handle.parentElement.offsetWidth) * 100;
-                
-                // Limita entre 0% e 100%
-                newLeft = Math.max(0, Math.min(100, newLeft));
-                
-                handle.style.left = `${newLeft}%`;
-                
-                // Atualiza o texto de porcentagem se existir
-                const percentageText = handle.parentElement.nextElementSibling;
-                if (percentageText && !percentageText.querySelector('span')) {
-                    percentageText.textContent = `${Math.round(newLeft)}%`;
-                }
-            };
-
-            const onMouseUp = () => {
-                isDragging = false;
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-            };
+        // Botão de redefinir
+        const resetButton = this.modal.querySelector('.reset-button');
+        resetButton.addEventListener('click', () => {
+            localStorage.removeItem('gameSettings');
+            this.loadSettings();
+            
+            resetButton.textContent = 'REDEFINIDO!';
+            setTimeout(() => {
+                resetButton.textContent = 'REDEFINIR';
+            }, 1000);
         });
+
+        // Eventos das tabs
+        const tabButtons = this.modal.querySelectorAll('.tab-button');
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tab = button.dataset.tab;
+                this.switchTab(tab);
+            });
+        });
+    }
+
+    switchTab(tabName) {
+        const tabButtons = this.modal.querySelectorAll('.tab-button');
+        const tabContents = this.modal.querySelectorAll('.tab-content');
+        
+        // Atualiza botões
+        tabButtons.forEach(btn => {
+            if (btn.dataset.tab === tabName) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        
+        // Atualiza conteúdo
+        tabContents.forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        const activeTab = this.modal.querySelector(`#${tabName}-tab`);
+        if (activeTab) {
+            activeTab.classList.add('active');
+            this.currentTab = tabName;
+        }
     }
 }

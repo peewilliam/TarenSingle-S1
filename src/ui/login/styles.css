@@ -737,6 +737,10 @@ body::after,
     transition: all 0.3s ease;
 }
 
+.tab-button:hover {
+    background: #3a2f2f;
+}
+
 .tab-button.active {
     background: linear-gradient(to bottom, #4a3030 0%, #2a1f1f 100%);
     border-bottom: 2px solid var(--primary-color);
@@ -744,12 +748,40 @@ body::after,
 }
 
 .options-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    height: 400px; /* Altura fixa */
+    overflow-y: auto; /* Adiciona scroll vertical quando necessário */
     padding: 20px;
     background: rgba(0, 0, 0, 0.2);
     border-radius: 3px;
+}
+
+.tab-content {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+    opacity: 1;
+}
+
+.options-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.options-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.options-content::-webkit-scrollbar-thumb {
+    background: #4a3030;
+    border-radius: 4px;
+}
+
+.options-content::-webkit-scrollbar-thumb:hover {
+    background: #5a4040;
 }
 
 .options-section {
@@ -762,47 +794,30 @@ body::after,
     font-size: 16px;
 }
 
-/* Controles personalizados */
-.custom-select {
-    width: 100%;
-    padding: 8px;
-    background: #1a1616;
-    border: 1px solid #4a3030;
-    color: #bbb;
-    border-radius: 3px;
+.tab-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
 }
 
-.custom-slider {
-    width: 100%;
-    height: 4px;
-    background: #1a1616;
-    border-radius: 2px;
-    position: relative;
-}
+@media (max-width: 768px) {
+    .options-tabs {
+        flex-wrap: wrap;
+    }
 
-.custom-slider .slider-handle {
-    width: 16px;
-    height: 16px;
-    background: var(--primary-color);
-    border-radius: 50%;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-}
+    .tab-button {
+        flex: 1;
+        min-width: 120px;
+        text-align: center;
+    }
 
-.custom-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-}
+    .tab-container {
+        grid-template-columns: 1fr;
+    }
 
-.custom-radio {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
+    .options-content {
+        height: 350px; /* Altura um pouco menor em mobile */
+    }
 }
 
 .options-footer {
@@ -958,4 +973,107 @@ body::after,
     .logo img {
         max-height: 800px;
     }
+}
+
+/* Controles personalizados */
+.custom-select {
+    width: 100%;
+    padding: 8px;
+    background: #1a1616;
+    border: 1px solid #4a3030;
+    color: #bbb;
+    border-radius: 3px;
+}
+
+.custom-slider {
+    width: 100%;
+    height: 4px;
+    background: #ffffff;
+    border-radius: 2px;
+    position: relative;
+    margin: 20px 0;
+}
+
+.custom-slider .slider-handle {
+    width: 16px;
+    height: 16px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.custom-slider .slider-handle:hover {
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+.slider-value {
+    text-align: right;
+    color: #bbb;
+    font-size: 14px;
+    margin-top: -15px;
+}
+
+.volume-slider {
+    margin-bottom: 25px;
+}
+
+.volume-slider label {
+    display: block;
+    color: #bbb;
+    margin-bottom: 10px;
+}
+
+.quality-labels {
+    display: flex;
+    justify-content: space-between;
+    color: #bbb;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.custom-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    margin-bottom: 15px;
+    color: #bbb;
+}
+
+.custom-radio {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    margin-bottom: 15px;
+    color: #bbb;
+}
+
+/* Ajustes específicos para as tabs */
+#graphics-tab .options-section {
+    background: transparent;
+    padding: 15px;
+    border-radius: 3px;
+    margin-bottom: 20px;
+}
+
+#graphics-tab .custom-checkbox {
+    margin-bottom: 10px;
+}
+
+#audio-tab .volume-slider {
+    background: transparent;
+    padding: 15px;
+    border-radius: 3px;
+    margin-bottom: 15px;
+}
+
+#audio-tab .options-section:last-child {
+    background: transparent;
+    padding: 15px;
+    border-radius: 3px;
 }

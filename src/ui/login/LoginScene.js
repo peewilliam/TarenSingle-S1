@@ -545,7 +545,6 @@ export class LoginScene {
     }
 
     start() {
-        this.createElements();
         this.optionsModal.create();
         this.animate();
     }
