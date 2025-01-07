@@ -1,87 +1,79 @@
+import { CreateAccountForm } from './modules/forms/CreateAccountForm.js';
+import { ResetPasswordForm } from './modules/forms/ResetPasswordForm.js';
+import { OptionsModal } from './modules/OptionsModal.js';
+
 export class LoginScene {
     constructor() {
         this.canvas = null;
         this.ctx = null;
         this.particles = [];
-        this.touchStartX = null;
-        this.touchStartY = null;
+        this.container = null;
         this.originalLoginForm = null;
+        this.optionsModal = null;
+        this.createAccountForm = new CreateAccountForm(this);
+        this.resetPasswordForm = new ResetPasswordForm(this);
+        
+        // Inicializa a cena
         this.init();
     }
 
     init() {
-        this.createElements();
+        // Inicializa o canvas e background
+        this.setupCanvas();
+        
+        // Cria os elementos da página
+        this.createLoginContainer();
+        
+        // Configura os eventos
         this.setupEventListeners();
-        this.createParticles();
+        
+        // Verifica capacidades do dispositivo
         this.checkDeviceCapabilities();
-    }
-
-    checkDeviceCapabilities() {
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        const container = document.querySelector('.login-container');
         
-        if (isMobile) {
-            container.classList.add('mobile-device');
-            this.adjustForMobile();
-        }
-
-        // Check for reduced motion preference
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            container.classList.add('reduced-motion');
-        }
-
-        // Handle orientation changes
-        window.addEventListener('orientationchange', () => {
-            setTimeout(() => {
-                this.resizeCanvas();
-                this.adjustForMobile();
-            }, 100);
-        });
+        // Inicia a animação
+        this.animate();
     }
 
-    adjustForMobile() {
-        const form = document.querySelector('.login-form');
-        const inputs = form.querySelectorAll('input');
-        
-        // Adjust input behavior for mobile
-        inputs.forEach(input => {
-            input.addEventListener('focus', () => {
-                setTimeout(() => {
-                    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 300);
-            });
-        });
-
-        // Handle virtual keyboard
-        window.addEventListener('resize', () => {
-            if (document.activeElement.tagName === 'INPUT') {
-                setTimeout(() => {
-                    document.activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 100);
-            }
-        });
-    }
-
-    createElements() {
-        // Create background canvas
+    setupCanvas() {
         this.canvas = document.createElement('canvas');
-        this.canvas.id = 'loginBackground';
+        this.canvas.className = 'login-background';
         this.ctx = this.canvas.getContext('2d');
         document.body.appendChild(this.canvas);
 
-        // Create login container with enhanced accessibility
-        const loginContainer = document.createElement('div');
-        loginContainer.className = 'login-container';
-        loginContainer.setAttribute('role', 'main');
-        loginContainer.setAttribute('aria-label', 'Formulário de Login');
+        // Configuração das partículas
+        this.particles = [];
+        this.numParticles = window.innerWidth < 768 ? 20 : 35;
         
-        loginContainer.innerHTML = `
+        // Criar partículas iniciais
+        this.createParticles();
+        
+        // Configurar resize
+        this.resizeCanvas();
+        window.addEventListener('resize', () => {
+            this.resizeCanvas();
+            this.createParticles();
+            this.adjustLayout();
+        });
+    }
+
+    createLoginContainer() {
+        // Remove container existente se houver
+        const existingContainer = document.querySelector('.login-container');
+        if (existingContainer) {
+            existingContainer.remove();
+        }
+
+        this.container = document.createElement('div');
+        this.container.className = 'login-container';
+        
+        // Conteúdo do login
+        this.container.innerHTML = `
             <div class="logo-container" role="banner">
                 <div class="logo">
                     <img src="/assets/logo.svg" alt="TarenOnline Logo" aria-label="Logo TarenOnline">
                 </div>
             </div>
-            <form class="login-form" id="loginForm" autocomplete="off" spellcheck="false" data-lpignore="true">
+            <form class="login-form" id="mainLoginForm" autocomplete="off" spellcheck="false" data-lpignore="true">
                 <!-- Campo oculto para enganar o Chrome -->
                 <div style="display:none">
                     <input type="text" name="hidden_username" />
@@ -92,7 +84,7 @@ export class LoginScene {
                         <i class="fas fa-user"></i>
                     </div>
                     <input type="text" 
-                           id="username" 
+                           id="mainUsername" 
                            name="random_username_${Math.random()}"
                            placeholder="USUÁRIO"
                            autocomplete="chrome-off"
@@ -111,7 +103,7 @@ export class LoginScene {
                         <i class="fas fa-lock"></i>
                     </div>
                     <input type="password" 
-                           id="password" 
+                           id="mainPassword" 
                            name="random_password_${Math.random()}"
                            placeholder="SENHA"
                            autocomplete="chrome-off"
@@ -125,8 +117,8 @@ export class LoginScene {
                            aria-label="Senha"
                            required>
                 </div>
-                <label class="remember-me" for="rememberMe">
-                    <input type="checkbox" id="rememberMe">
+                <label class="remember-me" for="mainRememberMe">
+                    <input type="checkbox" id="mainRememberMe">
                     <div class="checkbox-custom"></div>
                     <span>Lembrar informações</span>
                 </label>
@@ -134,9 +126,9 @@ export class LoginScene {
                     <span class="button-text">ENTRAR</span>
                 </button>
                 <div class="footer-links">
-                    <a href="#" class="forgot-password" aria-label="Esqueceu sua senha">Esqueceu sua senha?</a>
+                    <a href="#" class="forgot-password" id="forgotPassword" aria-label="Esqueceu sua senha">Esqueceu sua senha?</a>
                     <span class="separator" aria-hidden="true">•</span>
-                    <a href="#" class="create-account" aria-label="Criar nova conta">Criar Conta</a>
+                    <a href="#" class="create-account" id="createAccount" aria-label="Criar nova conta">Criar Conta</a>
                 </div>
             </form>
             <div class="social-media" role="navigation" aria-label="Links de Redes Sociais">
@@ -154,75 +146,73 @@ export class LoginScene {
                 Versão 1.0.0 | 2025 TarenOnline
             </div>
         `;
-        document.body.appendChild(loginContainer);
         
-        // Salva uma cópia do formulário de login original
-        this.originalLoginForm = document.getElementById('loginForm').cloneNode(true);
+        document.body.appendChild(this.container);
         
-        this.setupLogoEffects();
+        // Configurar eventos do formulário após adicionar ao DOM
+        this.setupFormEvents();
 
-        // Botão de configurações
+        // Salvar o formulário original para uso posterior
+        this.originalLoginForm = document.querySelector('#mainLoginForm').cloneNode(true);
+
+        // Adiciona o botão de configurações
+        this.setupSettingsButton();
+    }
+
+    setupSettingsButton() {
+        // Remove botão existente se houver
+        const existingButton = document.querySelector('.settings-button');
+        if (existingButton) {
+            existingButton.remove();
+        }
+
         const settingsButton = document.createElement('button');
         settingsButton.className = 'settings-button';
         settingsButton.setAttribute('aria-label', 'Configurações');
         settingsButton.innerHTML = '<i class="fas fa-cog"></i>';
         document.body.appendChild(settingsButton);
 
-        // Adiciona evento de clique ao botão de configurações
+        // Configura o modal de opções
+        this.optionsModal = new OptionsModal();
+        this.optionsModal.create();
+
+        // Adiciona evento de clique
         settingsButton.addEventListener('click', () => {
-            // Aqui você pode adicionar a lógica para abrir as configurações
-            console.log('Abrir configurações');
+            const overlay = document.querySelector('.modal-overlay');
+            const modal = document.querySelector('.options-modal');
+            if (overlay && modal) {
+                overlay.classList.add('active');
+                modal.classList.add('active');
+            }
         });
     }
 
-    setupLogoEffects() {
-        const logo = document.getElementById('gameLogo');
-        if (!logo) return;
+    setupFormEvents() {
+        const forgotPasswordLink = document.getElementById('forgotPassword');
+        const createAccountLink = document.getElementById('createAccount');
 
-        let rafId = null;
-        let targetRotateX = 0;
-        let targetRotateY = 0;
-        let currentRotateX = 0;
-        let currentRotateY = 0;
+        if (forgotPasswordLink) {
+            forgotPasswordLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleForgotPassword(e);
+            });
+        }
 
-        const animate = () => {
-            currentRotateX += (targetRotateX - currentRotateX) * 0.1;
-            currentRotateY += (targetRotateY - currentRotateY) * 0.1;
-            
-            logo.style.transform = `
-                perspective(1000px) 
-                rotateX(${currentRotateX}deg) 
-                rotateY(${currentRotateY}deg)
-            `;
+        if (createAccountLink) {
+            createAccountLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleCreateAccount(e);
+            });
+        }
 
-            rafId = requestAnimationFrame(animate);
-        };
-
-        logo.addEventListener('mousemove', (e) => {
-            const rect = logo.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / rect.width - 0.5;
-            const y = (e.clientY - rect.top) / rect.height - 0.5;
-            
-            targetRotateY = x * 10; 
-            targetRotateX = -y * 10;
-
-            if (!rafId) {
-                rafId = requestAnimationFrame(animate);
-            }
-        });
-
-        logo.addEventListener('mouseleave', () => {
-            targetRotateX = 0;
-            targetRotateY = 0;
-        });
-
-        logo.addEventListener('mousedown', () => {
-            logo.style.transform += ' scale(0.98)';
-        });
-
-        logo.addEventListener('mouseup', () => {
-            logo.style.transform = logo.style.transform.replace(' scale(0.98)', '');
-        });
+        // Event listener para o formulário de login
+        const loginForm = document.getElementById('mainLoginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleLogin();
+            });
+        }
     }
 
     setupEventListeners() {
@@ -237,46 +227,32 @@ export class LoginScene {
     }
 
     setupLoginFormEvents() {
-        const loginBtn = document.getElementById('loginBtn');
-        const inputs = document.querySelectorAll('input[type="text"], input[type="password"]');
-        const createAccountLink = document.querySelector('.create-account');
-        const forgotPasswordLink = document.querySelector('.forgot-password');
-        
-        if (loginBtn) {
-            loginBtn.addEventListener('click', this.handleLogin.bind(this));
+        // Event listener para o formulário de login
+        const loginForm = document.getElementById('mainLoginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleLogin();
+            });
         }
-        
-        if (createAccountLink) {
-            createAccountLink.addEventListener('click', this.handleCreateAccount.bind(this));
-        }
-        
+
+        // Event listeners para os links
+        const forgotPasswordLink = document.getElementById('forgotPassword');
+        const createAccountLink = document.getElementById('createAccount');
+
         if (forgotPasswordLink) {
-            forgotPasswordLink.addEventListener('click', this.handleForgotPassword.bind(this));
+            forgotPasswordLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleForgotPassword(e);
+            });
         }
-        
-        inputs.forEach(input => {
-            if (input) {
-                input.addEventListener('focus', () => {
-                    input.parentElement.classList.add('focused');
-                    this.handleInputFocus(input);
-                });
-                
-                input.addEventListener('blur', () => {
-                    if (!input.value) {
-                        input.parentElement.classList.remove('focused');
-                    }
-                    this.handleInputBlur(input);
-                });
 
-                input.addEventListener('input', () => this.validateInput(input));
-
-                input.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        this.handleLogin(e);
-                    }
-                });
-            }
-        });
+        if (createAccountLink) {
+            createAccountLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleCreateAccount(e);
+            });
+        }
     }
 
     setupCanvasEvents() {
@@ -305,9 +281,25 @@ export class LoginScene {
         });
     }
 
+    createParticles() {
+        this.particles = [];
+        const particleCount = window.innerWidth < 768 ? 20 : 35;
+        
+        for (let i = 0; i < particleCount; i++) {
+            const shade = Math.floor(Math.random() * 100) + 50;
+            this.particles.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                size: Math.random() * 2 + 1,
+                speedX: Math.random() * 2 - 1,
+                speedY: Math.random() * 2 - 1,
+                color: `rgba(${shade}, ${shade}, ${shade}, 0.8)`
+            });
+        }
+    }
+
     adjustInitialPosition() {
         const container = document.querySelector('.login-container');
-        const form = document.querySelector('.login-form');
         
         // Verificar se o conteúdo está visível
         const rect = container.getBoundingClientRect();
@@ -362,353 +354,200 @@ export class LoginScene {
         }
     }
 
-    resizeCanvas() {
-        const dpr = 1;
-        const { width, height } = document.body.getBoundingClientRect();
-        
-        this.canvas.width = width * dpr;
-        this.canvas.height = height * dpr;
-        
-        this.canvas.style.width = `${width}px`;
-        this.canvas.style.height = `${height}px`;
-        
-        // Garante que o fundo seja preto após o resize
-        this.ctx.fillStyle = '#000000';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        
-        // Ajusta a escala para retina displays
-        this.ctx.scale(dpr, dpr);
-    }
-
-    createParticles() {
-        const particleCount = window.innerWidth < 768 ? 20 : 35;
-        
-        this.particles = [];
-
-        for (let i = 0; i < particleCount; i++) {
-            const shade = Math.floor(Math.random() * 100) + 50;
-            const color = `rgba(${shade}, ${shade}, ${shade}, 0.8)`;
-
-            this.particles.push({
-                x: Math.random() * this.canvas.width,
-                y: Math.random() * this.canvas.height,
-                size: Math.random() * 2 + 1,
-                speedX: Math.random() * 2 - 1,
-                speedY: Math.random() * 2 - 1,
-                color: color
-            });
-        }
-    }
-
     animate() {
-        // Limpa o canvas com fundo preto ao invés de transparente
-        this.ctx.fillStyle = '#000000';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        // Limpa o canvas
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Adiciona um gradiente sutil
-        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        gradient.addColorStop(0, 'rgba(20, 20, 20, 0.4)');
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
-        this.ctx.fillStyle = gradient;
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        
-        // Atualiza e desenha as partículas
+        // Atualiza e desenha cada partícula
         this.particles.forEach(particle => {
             // Atualiza posição
             particle.x += particle.speedX;
             particle.y += particle.speedY;
-
+            
             // Verifica colisão com as bordas
-            if (particle.x < 0 || particle.x > this.canvas.width) particle.speedX *= -1;
-            if (particle.y < 0 || particle.y > this.canvas.height) particle.speedY *= -1;
-
+            if (particle.x <= 0 || particle.x >= this.canvas.width) {
+                particle.speedX *= -1;
+            }
+            if (particle.y <= 0 || particle.y >= this.canvas.height) {
+                particle.speedY *= -1;
+            }
+            
             // Desenha a partícula
             this.ctx.beginPath();
             this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
             this.ctx.fillStyle = particle.color;
             this.ctx.fill();
         });
-
+        
+        // Continua a animação
         requestAnimationFrame(() => this.animate());
     }
 
-    handleLogin(e) {
-        e.preventDefault();
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        
-        if (!username || !password) {
-            this.showError('Por favor, preencha todos os campos');
-            return;
-        }
-        
-        const button = document.getElementById('loginBtn');
-        button.classList.add('loading');
-        button.disabled = true;
-        
-        // Simulate login request
-        setTimeout(() => {
-            button.classList.remove('loading');
-            button.disabled = false;
-            // Add your login logic here
-            console.log('Tentativa de login:', { username });
-        }, 1500);
-    }
+    handleLogin() {
+        const username = document.getElementById('mainUsername').value;
+        const password = document.getElementById('mainPassword').value;
+        const rememberMe = document.getElementById('mainRememberMe').checked;
 
-    backToLogin() {
-        const currentForm = document.querySelector('.login-form');
-        if (currentForm && this.originalLoginForm) {
-            // Cria uma nova cópia do formulário original
-            const newLoginForm = this.originalLoginForm.cloneNode(true);
-            currentForm.parentNode.replaceChild(newLoginForm, currentForm);
-            this.setupLoginFormEvents();
-        }
+        // Aqui você pode adicionar a lógica de login
+        console.log('Login:', { username, password, rememberMe });
     }
 
     handleCreateAccount(e) {
         e.preventDefault();
-        const loginForm = document.querySelector('.login-form');
-        const createAccountForm = document.createElement('form');
-        createAccountForm.className = 'login-form';
-        createAccountForm.id = 'createAccountForm';
-        createAccountForm.autocomplete = 'off';
-        createAccountForm.spellcheck = 'false';
-        createAccountForm.dataLpignore = 'true';
+        const container = document.querySelector('.login-container');
         
-        createAccountForm.innerHTML = `
-            <form autocomplete="off" spellcheck="false" data-lpignore="true">
-                <!-- Campo oculto para enganar o Chrome -->
-                <div style="display:none">
-                    <input type="text" name="hidden_username" />
-                    <input type="password" name="hidden_password" />
-                </div>
-                <div class="form-group">
-                    <div class="input-icon">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <input type="text" 
-                           id="newUsername" 
-                           name="random_newuser_${Math.random()}"
-                           placeholder="NOVO USUÁRIO"
-                           autocomplete="chrome-off"
-                           readonly
-                           onfocus="this.removeAttribute('readonly');"
-                           data-lpignore="true"
-                           data-form-type="other"
-                           autocapitalize="off"
-                           autocorrect="off"
-                           spellcheck="false"
-                           required>
-                </div>
-                <div class="form-group">
-                    <div class="input-icon">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <input type="text" 
-                           id="email" 
-                           name="random_email_${Math.random()}"
-                           placeholder="E-MAIL"
-                           autocomplete="chrome-off"
-                           readonly
-                           onfocus="this.removeAttribute('readonly');"
-                           data-lpignore="true"
-                           data-form-type="other"
-                           autocapitalize="off"
-                           autocorrect="off"
-                           spellcheck="false"
-                           required
-                           pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
-                </div>
-                <div class="form-group">
-                    <div class="input-icon">
-                        <i class="fas fa-lock"></i>
-                    </div>
-                    <input type="password" 
-                           id="newPassword" 
-                           name="random_newpass_${Math.random()}"
-                           placeholder="NOVA SENHA"
-                           autocomplete="chrome-off"
-                           readonly
-                           onfocus="this.removeAttribute('readonly');"
-                           data-lpignore="true"
-                           data-form-type="other"
-                           autocapitalize="off"
-                           autocorrect="off"
-                           spellcheck="false"
-                           required>
-                </div>
-                <div class="form-group">
-                    <div class="input-icon">
-                        <i class="fas fa-lock"></i>
-                    </div>
-                    <input type="password" 
-                           id="confirmPassword" 
-                           name="random_confpass_${Math.random()}"
-                           placeholder="CONFIRMAR SENHA"
-                           autocomplete="chrome-off"
-                           readonly
-                           onfocus="this.removeAttribute('readonly');"
-                           data-lpignore="true"
-                           data-form-type="other"
-                           autocapitalize="off"
-                           autocorrect="off"
-                           spellcheck="false"
-                           required>
-                </div>
-                <button type="submit" class="login-button">
-                    <span class="button-text">CRIAR CONTA</span>
-                </button>
-                <div class="footer-links">
-                    <a href="#" class="back-to-login">Voltar para o Login</a>
-                </div>
-            `;
-
-        if (loginForm) {
-            loginForm.parentNode.replaceChild(createAccountForm, loginForm);
-
-            // Adiciona evento de voltar para login
-            const backToLoginLink = document.querySelector('.back-to-login');
-            if (backToLoginLink) {
-                backToLoginLink.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.backToLogin();
-                });
-            }
-
-            // Adiciona evento de submit do formulário de criação
-            createAccountForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const username = document.getElementById('newUsername').value;
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('newPassword').value;
-                const confirmPassword = document.getElementById('confirmPassword').value;
-
-                if (password !== confirmPassword) {
-                    this.showError('As senhas não coincidem');
-                    return;
-                }
-
-                console.log('Criando conta:', { username, email });
-                
-                setTimeout(() => {
-                    this.showSuccess('Conta criada com sucesso!');
-                    setTimeout(() => {
-                        this.backToLogin();
-                    }, 1500);
-                }, 1000);
-            });
-
-            // Setup events for the new form
-            const newInputs = createAccountForm.querySelectorAll('input');
-            newInputs.forEach(input => {
-                if (input) {
-                    input.addEventListener('focus', () => {
-                        input.parentElement.classList.add('focused');
-                        this.handleInputFocus(input);
-                    });
-                    
-                    input.addEventListener('blur', () => {
-                        if (!input.value) {
-                            input.parentElement.classList.remove('focused');
-                        }
-                        this.handleInputBlur(input);
-                    });
-
-                    input.addEventListener('input', () => this.validateInput(input));
-                }
-            });
+        // Salva o formulário de login original se ainda não foi salvo
+        if (!this.originalLoginForm) {
+            this.originalLoginForm = document.querySelector('#mainLoginForm').cloneNode(true);
         }
+
+        // Limpa apenas o conteúdo do formulário, não o container inteiro
+        const currentForm = container.querySelector('.login-form');
+        if (currentForm) {
+            currentForm.remove();
+        }
+        
+        // Adiciona o formulário de criar conta
+        this.createAccountForm.mount(container);
     }
 
     handleForgotPassword(e) {
         e.preventDefault();
-        const loginForm = document.querySelector('.login-form');
-        const resetForm = document.createElement('form');
-        resetForm.className = 'login-form';
-        resetForm.id = 'resetForm';
-        resetForm.autocomplete = 'off';
-        resetForm.spellcheck = 'false';
-        resetForm.dataLpignore = 'true';
+        const container = document.querySelector('.login-container');
         
-        resetForm.innerHTML = `
-            <form autocomplete="off" spellcheck="false" data-lpignore="true">
-                <!-- Campo oculto para enganar o Chrome -->
-                <div style="display:none">
-                    <input type="text" name="hidden_username" />
-                    <input type="password" name="hidden_password" />
-                </div>
-                <div class="form-group">
-                    <div class="input-icon">
-                        <i class="fas fa-envelope"></i>
-                    </div>
-                    <input type="text" 
-                           id="resetEmail" 
-                           name="random_resetemail_${Math.random()}"
-                           placeholder="SEU E-MAIL"
-                           autocomplete="chrome-off"
-                           readonly
-                           onfocus="this.removeAttribute('readonly');"
-                           data-lpignore="true"
-                           data-form-type="other"
-                           autocapitalize="off"
-                           autocorrect="off"
-                           spellcheck="false"
-                           required
-                           pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
-                </div>
-                <button type="submit" class="login-button">
-                    <span class="button-text">RECUPERAR SENHA</span>
-                </button>
-                <div class="footer-links">
-                    <a href="#" class="back-to-login">Voltar para o Login</a>
-                </div>
-            `;
+        // Salva o formulário de login original se ainda não foi salvo
+        if (!this.originalLoginForm) {
+            this.originalLoginForm = document.querySelector('#mainLoginForm').cloneNode(true);
+        }
 
-        if (loginForm) {
-            loginForm.parentNode.replaceChild(resetForm, loginForm);
+        // Limpa apenas o conteúdo do formulário, não o container inteiro
+        const currentForm = container.querySelector('.login-form');
+        if (currentForm) {
+            currentForm.remove();
+        }
+        
+        // Adiciona o formulário de resetar senha
+        this.resetPasswordForm.mount(container);
+    }
 
-            // Adiciona evento de voltar para login
-            const backToLoginLink = document.querySelector('.back-to-login');
-            if (backToLoginLink) {
-                backToLoginLink.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.backToLogin();
-                });
+    restoreLoginForm() {
+        if (this.originalLoginForm) {
+            const container = document.querySelector('.login-container');
+            const currentForm = container.querySelector('.login-form');
+            const logoContainer = container.querySelector('.logo-container');
+            
+            // Remove o formulário atual
+            if (currentForm) {
+                currentForm.remove();
             }
+            
+            // Cria uma cópia do formulário original
+            const newForm = this.originalLoginForm.cloneNode(true);
+            
+            // Insere o formulário após o logo-container
+            if (logoContainer && logoContainer.nextSibling) {
+                container.insertBefore(newForm, logoContainer.nextSibling);
+            } else {
+                container.appendChild(newForm);
+            }
+            
+            // Reconfigura os eventos
+            this.setupFormEvents();
+        }
+    }
 
-            // Adiciona evento de submit do formulário de reset
-            resetForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const email = document.getElementById('resetEmail').value;
+    resizeCanvas() {
+        // Atualiza o tamanho do canvas para cobrir toda a janela
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+        
+        // Atualiza o estilo CSS para garantir que cubra toda a tela
+        this.canvas.style.width = '100vw';
+        this.canvas.style.height = '100vh';
+        this.canvas.style.position = 'fixed';
+        this.canvas.style.left = '0';
+        this.canvas.style.zIndex = '-1';
+    }
 
-                console.log('Solicitando reset de senha para:', email);
-                
-                setTimeout(() => {
-                    this.showSuccess('E-mail de recuperação enviado!');
-                    setTimeout(() => {
-                        this.backToLogin();
-                    }, 1500);
-                }, 1000);
-            });
-
-            // Setup events for the reset form
-            const resetEmail = document.getElementById('resetEmail');
-            if (resetEmail) {
-                resetEmail.addEventListener('focus', () => {
-                    resetEmail.parentElement.classList.add('focused');
-                    this.handleInputFocus(resetEmail);
-                });
-                
-                resetEmail.addEventListener('blur', () => {
-                    if (!resetEmail.value) {
-                        resetEmail.parentElement.classList.remove('focused');
-                    }
-                    this.handleInputBlur(resetEmail);
-                });
-
-                resetEmail.addEventListener('input', () => this.validateInput(resetEmail));
+    adjustLayout() {
+        // Ajusta o número de partículas baseado no tamanho da tela
+        this.numParticles = window.innerWidth < 768 ? 20 : 35;
+        
+        // Atualiza o layout responsivo
+        const container = document.querySelector('.login-container');
+        if (container) {
+            if (window.innerWidth <= 768) {
+                container.classList.add('mobile-device');
+                container.classList.remove('desktop-device');
+            } else {
+                container.classList.add('desktop-device');
+                container.classList.remove('mobile-device');
             }
         }
+
+        // Ajusta o modal de opções se estiver aberto
+        const optionsModal = document.querySelector('.options-modal');
+        if (optionsModal && optionsModal.classList.contains('active')) {
+            if (window.innerWidth <= 768) {
+                optionsModal.style.width = '90%';
+                optionsModal.style.maxHeight = '90vh';
+            } else {
+                optionsModal.style.width = '600px';
+                optionsModal.style.maxHeight = '80vh';
+            }
+        }
+    }
+
+    checkDeviceCapabilities() {
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        const container = document.querySelector('.login-container');
+        
+        if (isMobile) {
+            container.classList.add('mobile-device');
+            this.adjustForMobile();
+        }
+
+        // Check for reduced motion preference
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            container.classList.add('reduced-motion');
+        }
+
+        // Handle orientation changes
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                this.resizeCanvas();
+                this.adjustForMobile();
+            }, 100);
+        });
+    }
+
+    adjustForMobile() {
+        const form = document.querySelector('.login-form');
+        const inputs = form.querySelectorAll('input');
+        
+        // Adjust input behavior for mobile
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                setTimeout(() => {
+                    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+            });
+        });
+
+        // Handle virtual keyboard
+        window.addEventListener('resize', () => {
+            if (document.activeElement.tagName === 'INPUT') {
+                setTimeout(() => {
+                    document.activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
+        });
+    }
+
+    start() {
+        this.createElements();
+        this.optionsModal.create();
+        this.animate();
     }
 
     showError(message) {
@@ -755,9 +594,5 @@ export class LoginScene {
             successDiv.classList.add('fade-out');
             setTimeout(() => successDiv.remove(), 300);
         }, 3000);
-    }
-
-    start() {
-        this.animate();
     }
 }
