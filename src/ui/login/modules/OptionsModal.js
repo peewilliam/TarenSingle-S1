@@ -28,9 +28,12 @@ export class OptionsModal {
                 <button class="options-close" aria-label="Fechar configurações">&times;</button>
             </div>
             <div class="options-tabs">
-                <button class="tab-button active" data-tab="general">GERAL</button>
-                <button class="tab-button" data-tab="graphics">GRÁFICOS</button>
-                <button class="tab-button" data-tab="audio">ÁUDIO</button>
+                <div class="tab-buttons">
+                    <button class="tab-button active" data-tab="general">GERAL</button>
+                    <button class="tab-button" data-tab="graphics">GRÁFICOS</button>
+                    <button class="tab-button" data-tab="audio">ÁUDIO</button>
+                </div>
+                <button class="reset-button">REDEFINIR</button>
             </div>
             <div class="options-content">
                 <div id="general-tab" class="tab-content active"></div>
@@ -38,7 +41,6 @@ export class OptionsModal {
                 <div id="audio-tab" class="tab-content"></div>
             </div>
             <div class="options-footer">
-                <button class="reset-button">REDEFINIR</button>
                 <button class="apply-button">APLICAR</button>
             </div>
         `;
@@ -69,7 +71,15 @@ export class OptionsModal {
             ...this.tabs.audio.getSettings()
         };
 
+        // Aplica as configurações apenas nas tabs que suportam
+        Object.values(this.tabs).forEach(tab => {
+            if (typeof tab.applySettings === 'function') {
+                tab.applySettings(settings);
+            }
+        });
+        
         localStorage.setItem('gameSettings', JSON.stringify(settings));
+        
         return settings;
     }
 
@@ -117,9 +127,18 @@ export class OptionsModal {
             applyButton.textContent = 'APLICADO!';
             setTimeout(() => {
                 applyButton.textContent = 'APLICAR';
-                this.overlay.classList.remove('active');
-                this.modal.classList.remove('active');
+                // this.overlay.classList.remove('active');
+                // this.modal.classList.remove('active');
             }, 1000);
+        });
+
+        // Eventos das tabs
+        const tabButtons = this.modal.querySelectorAll('.tab-button[data-tab]');
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tab = button.dataset.tab;
+                this.switchTab(tab);
+            });
         });
 
         // Botão de redefinir
@@ -132,15 +151,6 @@ export class OptionsModal {
             setTimeout(() => {
                 resetButton.textContent = 'REDEFINIR';
             }, 1000);
-        });
-
-        // Eventos das tabs
-        const tabButtons = this.modal.querySelectorAll('.tab-button');
-        tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const tab = button.dataset.tab;
-                this.switchTab(tab);
-            });
         });
     }
 

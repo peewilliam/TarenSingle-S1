@@ -84,7 +84,7 @@ export class LoginScene {
                         <i class="fas fa-user"></i>
                     </div>
                     <input type="text" 
-                           id="mainUsername" 
+                           id="username" 
                            name="random_username_${Math.random()}"
                            placeholder="USUÁRIO"
                            autocomplete="chrome-off"
@@ -103,7 +103,7 @@ export class LoginScene {
                         <i class="fas fa-lock"></i>
                     </div>
                     <input type="password" 
-                           id="mainPassword" 
+                           id="password" 
                            name="random_password_${Math.random()}"
                            placeholder="SENHA"
                            autocomplete="chrome-off"
@@ -150,7 +150,7 @@ export class LoginScene {
         document.body.appendChild(this.container);
         
         // Configurar eventos do formulário após adicionar ao DOM
-        this.setupFormEvents();
+        this.setupLoginFormEvents();
 
         // Salvar o formulário original para uso posterior
         this.originalLoginForm = document.querySelector('#mainLoginForm').cloneNode(true);
@@ -187,34 +187,6 @@ export class LoginScene {
         });
     }
 
-    setupFormEvents() {
-        const forgotPasswordLink = document.getElementById('forgotPassword');
-        const createAccountLink = document.getElementById('createAccount');
-
-        if (forgotPasswordLink) {
-            forgotPasswordLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.handleForgotPassword(e);
-            });
-        }
-
-        if (createAccountLink) {
-            createAccountLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.handleCreateAccount(e);
-            });
-        }
-
-        // Event listener para o formulário de login
-        const loginForm = document.getElementById('mainLoginForm');
-        if (loginForm) {
-            loginForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleLogin();
-            });
-        }
-    }
-
     setupEventListeners() {
         window.addEventListener('resize', () => this.resizeCanvas());
         this.resizeCanvas();
@@ -227,16 +199,6 @@ export class LoginScene {
     }
 
     setupLoginFormEvents() {
-        // Event listener para o formulário de login
-        const loginForm = document.getElementById('mainLoginForm');
-        if (loginForm) {
-            loginForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleLogin();
-            });
-        }
-
-        // Event listeners para os links
         const forgotPasswordLink = document.getElementById('forgotPassword');
         const createAccountLink = document.getElementById('createAccount');
 
@@ -251,6 +213,15 @@ export class LoginScene {
             createAccountLink.addEventListener('click', (e) => {
                 e.preventDefault();
                 this.handleCreateAccount(e);
+            });
+        }
+
+        // Event listener para o formulário de login
+        const loginForm = document.getElementById('mainLoginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleLogin(e);
             });
         }
     }
@@ -380,16 +351,22 @@ export class LoginScene {
         });
         
         // Continua a animação
-        requestAnimationFrame(() => this.animate());
+        this.animationFrameId = requestAnimationFrame(() => this.animate());
     }
 
-    handleLogin() {
-        const username = document.getElementById('mainUsername').value;
-        const password = document.getElementById('mainPassword').value;
-        const rememberMe = document.getElementById('mainRememberMe').checked;
-
-        // Aqui você pode adicionar a lógica de login
-        console.log('Login:', { username, password, rememberMe });
+    async handleLogin(event) {
+        event.preventDefault();
+        
+        // Limpa os eventos e animações do login
+        this.cleanup();
+        
+        // Limpa o corpo da página
+        document.body.innerHTML = '';
+        
+        // Carrega e inicializa a tela de seleção de personagem
+        const { CharacterSelectScene } = await import('../character-select/CharacterSelectScene.js');
+        const characterSelect = new CharacterSelectScene();
+        characterSelect.init();
     }
 
     handleCreateAccount(e) {
@@ -452,7 +429,7 @@ export class LoginScene {
             }
             
             // Reconfigura os eventos
-            this.setupFormEvents();
+            this.setupLoginFormEvents();
         }
     }
 
@@ -593,5 +570,25 @@ export class LoginScene {
             successDiv.classList.add('fade-out');
             setTimeout(() => successDiv.remove(), 300);
         }, 3000);
+    }
+
+    cleanup() {
+        // Remove os event listeners
+        if (this.canvas) {
+            this.canvas.removeEventListener('touchstart', this.handleTouchStart);
+            this.canvas.removeEventListener('touchmove', this.handleTouchMove);
+            this.canvas.removeEventListener('touchend', this.handleTouchEnd);
+            window.removeEventListener('resize', this.handleResize);
+        }
+        
+        // Para a animação
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+        }
+        
+        // Remove referências
+        this.canvas = null;
+        this.ctx = null;
+        this.particles = [];
     }
 }
