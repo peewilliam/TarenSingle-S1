@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="600" height="180" viewBox="0 0 600 180" xmlns="http://www.w3.org/2000/svg">
+    <!-- Gradients and Filters -->
+    <defs>
+        <!-- Metal Gold Gradient -->
+        <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+            <stop offset="25%" style="stop-color:#FDB931;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+            <stop offset="75%" style="stop-color:#FDB931;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#CD7F32;stop-opacity:1" />
+        </linearGradient>
+        
+        <!-- Magical Glow -->
+        <filter id="magicalGlow">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feFlood flood-color="#FFA500" flood-opacity="0.5"/>
+            <feComposite in2="blur" operator="in"/>
+            <feMerge>
+                <feMergeNode/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+        
+        <!-- Sword Shine -->
+        <linearGradient id="swordShine" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#FFF;stop-opacity:0"/>
+            <stop offset="50%" style="stop-color:#FFF;stop-opacity:0.8"/>
+            <stop offset="100%" style="stop-color:#FFF;stop-opacity:0"/>
+        </linearGradient>
+    </defs>
+
+    <!-- Background Shield -->
+    <path d="M300,20 L420,60 L380,140 L300,160 L220,140 L180,60 Z" 
+          fill="rgba(0,0,0,0.3)" 
+          stroke="url(#goldGradient)" 
+          stroke-width="2"/>
+
+    <!-- Decorative Dragons -->
+    <g transform="translate(160,70) scale(0.6)" fill="url(#goldGradient)" filter="url(#magicalGlow)">
+        <path d="M0,0 C20,-20 40,-10 50,0 C60,10 70,0 80,-10 L90,0 L80,10 C70,20 60,10 50,0 C40,-10 20,20 0,0Z"/>
+    </g>
+    <g transform="translate(440,70) scale(-0.6,0.6)" fill="url(#goldGradient)" filter="url(#magicalGlow)">
+        <path d="M0,0 C20,-20 40,-10 50,0 C60,10 70,0 80,-10 L90,0 L80,10 C70,20 60,10 50,0 C40,-10 20,20 0,0Z"/>
+    </g>
+
+    <!-- Crossed Swords -->
+    <g transform="translate(300,90)" filter="url(#magicalGlow)">
+        <!-- Sword 1 -->
+        <g transform="rotate(-45)">
+            <rect x="-100" y="-5" width="200" height="10" fill="url(#goldGradient)" rx="2"/>
+            <rect x="-110" y="-15" width="20" height="30" fill="url(#goldGradient)" rx="5"/>
+            <rect x="90" y="-15" width="20" height="30" fill="url(#goldGradient)" rx="5"/>
+            <rect x="-80" y="-2" width="160" height="4" fill="url(#swordShine)" opacity="0.5">
+                <animate attributeName="x" from="-80" to="80" dur="3s" repeatCount="indefinite"/>
+            </rect>
+        </g>
+        <!-- Sword 2 -->
+        <g transform="rotate(45)">
+            <rect x="-100" y="-5" width="200" height="10" fill="url(#goldGradient)" rx="2"/>
+            <rect x="-110" y="-15" width="20" height="30" fill="url(#goldGradient)" rx="5"/>
+            <rect x="90" y="-15" width="20" height="30" fill="url(#goldGradient)" rx="5"/>
+            <rect x="-80" y="-2" width="160" height="4" fill="url(#swordShine)" opacity="0.5">
+                <animate attributeName="x" from="-80" to="80" dur="3s" repeatCount="indefinite"/>
+            </rect>
+        </g>
+    </g>
+
+    <!-- Main Text "TAREN" -->
+    <g filter="url(#magicalGlow)">
+        <text x="300" y="100" 
+              text-anchor="middle" 
+              fill="url(#goldGradient)" 
+              font-family="Cinzel" 
+              font-size="72" 
+              font-weight="bold"
+              letter-spacing="5">
+            TAREN
+            <!-- Text Shadow -->
+            <animate attributeName="filter" 
+                     values="url(#magicalGlow);url(#magicalGlow) url(#magicalGlow);url(#magicalGlow)" 
+                     dur="4s" 
+                     repeatCount="indefinite"/>
+        </text>
+    </g>
+
+    <!-- "ONLINE" Text -->
+    <g filter="url(#magicalGlow)">
+        <text x="300" y="135" 
+              text-anchor="middle" 
+              fill="#FFA500" 
+              font-family="Cinzel" 
+              font-size="28" 
+              letter-spacing="10">
+            ONLINE
+        </text>
+    </g>
+
+    <!-- Decorative Runes -->
+    <g transform="translate(0,0)" filter="url(#magicalGlow)">
+        <path d="M200,140 L220,140 M380,140 L400,140" 
+              stroke="url(#goldGradient)" 
+              stroke-width="3" 
+              stroke-linecap="round"/>
+        <circle cx="190" cy="140" r="4" fill="#FFD700"/>
+        <circle cx="410" cy="140" r="4" fill="#FFD700"/>
+    </g>
+</svg>

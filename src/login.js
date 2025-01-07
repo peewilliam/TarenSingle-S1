@@ -1,7 +1,11 @@
 import { LoginScene } from './ui/login/LoginScene';
+import './ui/login/styles.css';
 
-// Initialize login scene
+// Inicializar a cena de login
 const loginScene = new LoginScene();
 
-// Start the animation
+// Iniciar a animação
 loginScene.start();
+
+// Exportar a instância para uso em outros lugares, se necessário
+export { loginScene };

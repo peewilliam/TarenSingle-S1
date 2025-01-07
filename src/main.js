@@ -1,16 +1,11 @@
-import './style.css';
-import { GameEngine } from './game/core/GameEngine.js';
+import './ui/login/styles.css';
+import { LoginScene } from './ui/login/LoginScene';
 
-// Initialize game
-const game = new GameEngine();
+// Initialize login scene
+const loginScene = new LoginScene();
 
-// Start the game loop
-game.start();
+// Start the animation
+loginScene.start();
 
-// Add initial instructions to chat
-game.uiManager.addChatMessage('System', 'Welcome to the game!', 'system');
-game.uiManager.addChatMessage('System', 'Controls:', 'system');
-game.uiManager.addChatMessage('System', '- QWER: Use skills', 'system');
-game.uiManager.addChatMessage('System', '- Right click: Move', 'system');
-game.uiManager.addChatMessage('System', '- Left click: Select target', 'system');
-game.uiManager.addChatMessage('System', '- Enter: Open chat', 'system');
+// Export loginScene for potential use in other modules
+export { loginScene };
