@@ -91,6 +91,39 @@ export class OptionsModal {
         this.setupEvents();
     }
 
+    saveSettings() {
+        const settings = {
+            resolution: this.modal.querySelector('.custom-select').value,
+            brightness: parseInt(this.modal.querySelector('.slider-handle').style.left),
+            quality: parseInt(this.modal.querySelectorAll('.slider-handle')[1].style.left),
+            fullscreen: this.modal.querySelector('input[type="checkbox"]').checked,
+            ambientSound: this.modal.querySelectorAll('input[type="checkbox"]')[1].checked,
+            textureQuality: this.modal.querySelector('input[name="textures"]:checked')?.id || 'radio1'
+        };
+
+        localStorage.setItem('gameSettings', JSON.stringify(settings));
+        return settings;
+    }
+
+    loadSettings() {
+        const savedSettings = localStorage.getItem('gameSettings');
+        if (savedSettings) {
+            const settings = JSON.parse(savedSettings);
+            
+            // Aplica as configurações salvas
+            this.modal.querySelector('.custom-select').value = settings.resolution;
+            this.modal.querySelector('.slider-handle').style.left = `${settings.brightness}%`;
+            this.modal.querySelectorAll('.slider-handle')[1].style.left = `${settings.quality}%`;
+            this.modal.querySelector('input[type="checkbox"]').checked = settings.fullscreen;
+            this.modal.querySelectorAll('input[type="checkbox"]')[1].checked = settings.ambientSound;
+            
+            if (settings.textureQuality) {
+                const radioButton = this.modal.querySelector(`#${settings.textureQuality}`);
+                if (radioButton) radioButton.checked = true;
+            }
+        }
+    }
+
     setupEvents() {
         // Botão de configurações
         const settingsButton = document.createElement('button');
@@ -99,32 +132,72 @@ export class OptionsModal {
         settingsButton.innerHTML = '<i class="fas fa-cog"></i>';
         document.body.appendChild(settingsButton);
 
-        // Eventos
+        // Eventos do modal
         settingsButton.addEventListener('click', () => {
             this.overlay.classList.add('active');
             this.modal.classList.add('active');
+            this.loadSettings(); // Carrega as configurações salvas
         });
 
+        // Botão de fechar
         const closeButton = this.modal.querySelector('.options-close');
         closeButton.addEventListener('click', () => {
             this.overlay.classList.remove('active');
             this.modal.classList.remove('active');
         });
 
-        this.overlay.addEventListener('click', (e) => {
-            if (e.target === this.overlay) {
+        // Botão de aplicar
+        const applyButton = this.modal.querySelector('.apply-button');
+        applyButton.addEventListener('click', () => {
+            const settings = this.saveSettings();
+            console.log('Configurações salvas:', settings);
+            
+            // Feedback visual
+            applyButton.textContent = 'APLICADO!';
+            setTimeout(() => {
+                applyButton.textContent = 'APLICAR';
                 this.overlay.classList.remove('active');
                 this.modal.classList.remove('active');
-            }
+            }, 1000);
         });
 
-        // Eventos das tabs
-        const tabButtons = this.modal.querySelectorAll('.tab-button');
-        tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
+        // Eventos dos sliders
+        const sliderHandles = this.modal.querySelectorAll('.slider-handle');
+        sliderHandles.forEach(handle => {
+            let isDragging = false;
+            let startX, startLeft;
+
+            handle.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startX = e.clientX;
+                startLeft = parseInt(handle.style.left) || 0;
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
             });
+
+            const onMouseMove = (e) => {
+                if (!isDragging) return;
+                
+                const dx = e.clientX - startX;
+                let newLeft = startLeft + (dx / handle.parentElement.offsetWidth) * 100;
+                
+                // Limita entre 0% e 100%
+                newLeft = Math.max(0, Math.min(100, newLeft));
+                
+                handle.style.left = `${newLeft}%`;
+                
+                // Atualiza o texto de porcentagem se existir
+                const percentageText = handle.parentElement.nextElementSibling;
+                if (percentageText && !percentageText.querySelector('span')) {
+                    percentageText.textContent = `${Math.round(newLeft)}%`;
+                }
+            };
+
+            const onMouseUp = () => {
+                isDragging = false;
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            };
         });
     }
 }
