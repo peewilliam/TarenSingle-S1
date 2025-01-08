@@ -15,10 +15,6 @@ export class PlayerStats {
         characterInfo.className = 'character-info';
      
 
-        // Character silhouette
-        const characterModel = document.createElement('div');
-        characterModel.className = 'character-model';
-
         // Stats list
         const statsList = document.createElement('div');
         statsList.className = 'stats-list';
@@ -41,7 +37,7 @@ export class PlayerStats {
         });
 
         panel.appendChild(characterInfo);
-        panel.appendChild(characterModel);
+ 
         panel.appendChild(statsList);
 
         return panel;

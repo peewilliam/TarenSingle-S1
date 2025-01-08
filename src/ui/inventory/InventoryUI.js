@@ -57,10 +57,47 @@ export class InventoryUI {
         inventorySection.className = 'inventory-section';
 
         // Add character header
-        const characterHeader = document.createElement('div');
-        characterHeader.className = 'character-header';
-        characterHeader.innerHTML = '<h2>IndexJS</h2>';
-        inventorySection.appendChild(characterHeader);
+        // const characterHeader = document.createElement('div');
+        // characterHeader.className = 'character-header';
+        // characterHeader.innerHTML = `
+        //     <div class="character-title">CHARACTER NAME</div>
+        //     <div class="character-subtitle">Title Goes Here</div>
+        // `;
+        // inventorySection.appendChild(characterHeader);
+
+        // Create character equipment section
+        const equipmentSection = document.createElement('div');
+        equipmentSection.className = 'equipment-section';
+
+        // Create left equipment slots
+        const leftEquipSlots = document.createElement('div');
+        leftEquipSlots.className = 'equipment-slots left';
+        for (let i = 0; i < 6; i++) {
+            const slot = document.createElement('div');
+            slot.className = 'equipment-slot';
+            leftEquipSlots.appendChild(slot);
+        }
+
+        // Create character model
+        const characterModel = document.createElement('div');
+        characterModel.className = 'character-model';
+
+        // Create right equipment slots
+        const rightEquipSlots = document.createElement('div');
+        rightEquipSlots.className = 'equipment-slots right';
+        for (let i = 0; i < 6; i++) {
+            const slot = document.createElement('div');
+            slot.className = 'equipment-slot';
+            rightEquipSlots.appendChild(slot);
+        }
+
+        // Add all elements to equipment section
+        equipmentSection.appendChild(leftEquipSlots);
+        equipmentSection.appendChild(characterModel);
+        equipmentSection.appendChild(rightEquipSlots);
+
+        // Add equipment section before inventory grid
+        inventorySection.appendChild(equipmentSection);
 
         // Add inventory grid
         inventorySection.appendChild(this.inventoryGrid.element);
