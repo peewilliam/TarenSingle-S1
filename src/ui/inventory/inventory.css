@@ -5,7 +5,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     width: 300px;
-    height: 552px;
+    height: 675px;
     display: flex;
     flex-direction: column;
     background-color: rgba(15, 15, 15, 0.98);
@@ -95,8 +95,7 @@
     gap: 10px;
     padding: 10px;
     background: rgba(15, 15, 15, 0.98);
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 .character-header {
@@ -151,16 +150,13 @@
 }
 
 .inventory-grid {
+    flex: 1;
     display: grid;
-    grid-template-columns: repeat(5, 52px);
-    grid-template-rows: repeat(7, 52px);
+    grid-template-columns: repeat(5, 1fr);
     gap: 4px;
-    padding: 2px;
-    justify-content: center;
-    background: rgba(15, 15, 15, 0.98);
-    min-height: min-content;
-    width: fit-content;
-    margin: 0 auto;
+    padding: 5px;
+    overflow-y: auto;
+    min-height: 0;
 }
 
 .inventory-slot {
@@ -220,7 +216,7 @@
     left: 50%;
     transform: translate(calc(-50% - 273px), -50%); /* Invertido para -271px para ficar à esquerda */
     width: 244px;
-    height: 552px;
+    height: 675px;
     background: rgba(15, 15, 15, 0.98);
     border: 1px solid #4a1f1f;
     border-right: none;
@@ -364,4 +360,41 @@
 
 .draggable {
     user-select: none;
+}
+
+
+/* Grid do inventário com scroll estilizado */
+.inventory-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(5, 52px);
+    gap: 4px;
+    padding: 0px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+    margin: 0 auto;
+    scrollbar-width: thin;
+    scrollbar-color: #292928 rgba(0, 0, 0, 0.3);
+}
+
+/* Estilo do scroll para navegadores WebKit */
+.inventory-grid::-webkit-scrollbar {
+    width: 1px;
+}
+
+.inventory-grid::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+    /* border: 1px solid #4a1f1f; */
+    border-radius: 10px;
+}
+
+.inventory-grid::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #c17d11, #8b4513);
+    /* border: 1px solid #4a1f1f; */
+    border-radius: 10px;
+}
+
+.inventory-grid::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #daa520, #cd853f);
 }
