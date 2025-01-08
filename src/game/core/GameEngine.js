@@ -6,11 +6,15 @@ import { Player } from '../entities/Player.js';
 import { InputManager } from './InputManager.js';
 import { UIManager } from '../../ui/UIManager.js';
 import { EventEmitter } from '../utils/EventEmitter.js';
+import { GameManager } from '../GameManager.js';
 
 export class GameEngine {
   constructor() {
     // Initialize event system
     this.events = new EventEmitter();
+
+    
+    this.gameManager = new GameManager();
     
     // Initialize core systems
     this.rendererManager = new RendererManager();

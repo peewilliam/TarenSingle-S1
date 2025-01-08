@@ -1,0 +1,330 @@
+/* Container principal */
+.inventory-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    height: 552px;
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(15, 15, 15, 0.98);
+    border: 1px solid #4a1f1f;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    color: #d4d4d4;
+    font-family: 'Cinzel', serif;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.inventory-container.stats-visible {
+    border-left: none;
+    border-radius: 0 4px 4px 0;
+}
+
+/* Header do inventário */
+.window-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 8px 15px;
+    background: linear-gradient(to bottom, rgba(74, 31, 31, 0.4), rgba(74, 31, 31, 0.2));
+    border-bottom: 1px solid #4a1f1f;
+    position: relative;
+}
+
+.window-title {
+    color: #c17d11;
+    font-size: 1.2em;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.close-btn {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    color: #c17d11;
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 0 5px;
+    line-height: 1;
+    transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+    color: #ff9f1f;
+    transform: scale(1.1);
+}
+
+/* Botão Toggle */
+.toggle-stats-btn {
+    position: absolute;
+    left: 0;
+    top: 40px;
+    width: 30px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to right, rgba(74, 31, 31, 0.4), rgba(74, 31, 31, 0.2));
+    border: none;
+    border-right: 1px solid #4a1f1f;
+    color: #c17d11;
+    font-family: 'Cinzel', serif;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 1001;
+}
+
+.toggle-stats-btn:hover {
+    background: rgba(74, 31, 31, 0.5);
+    color: #ff9f1f;
+}
+
+/* Seção principal do inventário */
+.inventory-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    background: rgba(15, 15, 15, 0.98);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.character-header {
+    text-align: left;
+    padding: 5px;
+}
+
+.character-header h2 {
+    color: #c17d11;
+    margin: 0;
+    font-size: 1em;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 52px);
+    grid-template-rows: repeat(7, 52px);
+    gap: 4px;
+    padding: 2px;
+    justify-content: center;
+    background: rgba(15, 15, 15, 0.98);
+    min-height: min-content;
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.inventory-slot {
+    width: 52px;
+    height: 52px;
+    background: rgba(20, 20, 20, 0.98);
+    border: 1px solid #2a2a2a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.inventory-slot:hover {
+    border-color: #4a1f1f;
+}
+
+.inventory-slot.selected {
+    border-color: #c17d11;
+}
+
+.currency-display {
+    display: flex;
+    gap: 15px;
+    padding: 5px;
+    font-size: 0.9em;
+}
+
+.currency-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.currency-icon {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.currency-gold {
+    background: #ffd700;
+}
+
+.currency-silver {
+    background: #c0c0c0;
+}
+
+.currency-copper {
+    background: #cd7f32;
+}
+
+.stats-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(calc(-50% - 273px), -50%); /* Invertido para -271px para ficar à esquerda */
+    width: 244px;
+    height: 552px;
+    background: rgba(15, 15, 15, 0.98);
+    border: 1px solid #4a1f1f;
+    border-right: none;
+    border-radius: 4px 0 0 4px;
+    z-index: 1002;
+    display: none;
+    flex-direction: column;
+    color: #d4d4d4;
+}
+
+.stats-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.stats-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #4a1f1f rgba(20, 20, 20, 0.5);
+    padding-right: 6px;
+}
+
+.stats-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.stats-list::-webkit-scrollbar-track {
+    background: rgba(20, 20, 20, 0.3);
+}
+
+.stats-list::-webkit-scrollbar-thumb {
+    background-color: #4a1f1f;
+    border-radius: 3px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(74, 31, 31, 0.3);
+    padding-bottom: 4px;
+}
+
+.stat-name {
+    color: #6ea5d5;
+    font-size: 0.9em;
+}
+
+.stat-value {
+    color: #c17d11;
+    font-size: 0.9em;
+}
+
+.send-button {
+    padding: 6px 16px;
+    background: #4a1f1f;
+    border: 1px solid #6a2f2f;
+    color: #ffd700;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 0.9em;
+    margin-left: auto;
+    transition: all 0.2s ease;
+}
+
+.send-button:hover {
+    background: #6a2f2f;
+}
+
+/* Tooltip styles */
+.item-tooltip {
+    position: fixed;
+    display: none;
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid #4a1f1f;
+    padding: 6px;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 1100;
+    font-size: 0.85em;
+    min-width: 180px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.tooltip-header {
+    font-size: 1em;
+    margin-bottom: 4px;
+    font-weight: bold;
+}
+
+.tooltip-quantity {
+    color: #888;
+    font-size: 0.85em;
+    margin-bottom: 4px;
+}
+
+.tooltip-description {
+    color: #aaa;
+    font-size: 0.85em;
+    line-height: 1.3;
+}
+
+/* Item rarity borders */
+.inventory-item.rarity-common {
+    border: 1px solid #9d9d9d;
+}
+
+.inventory-item.rarity-uncommon {
+    border: 1px solid #1eff00;
+    box-shadow: 0 0 3px rgba(30, 255, 0, 0.3);
+}
+
+.inventory-item.rarity-rare {
+    border: 1px solid #0070dd;
+    box-shadow: 0 0 3px rgba(0, 112, 221, 0.3);
+}
+
+.inventory-item.rarity-epic {
+    border: 1px solid #a335ee;
+    box-shadow: 0 0 3px rgba(163, 53, 238, 0.3);
+}
+
+.inventory-item.rarity-legendary {
+    border: 1px solid #ff8000;
+    box-shadow: 0 0 3px rgba(255, 128, 0, 0.3);
+}
+
+.stats-section {
+    flex: 1;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.draggable {
+    user-select: none;
+}
